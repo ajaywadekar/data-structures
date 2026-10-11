@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Structures (102040304) | CVM University</title>
+<meta name="description" content="Course website for Data Structures (102040304), B.Tech Computer Science and Design, Semester III: overview, weekly schedule, assessment plan, resources and contact.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%9A%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F5F3; --surface:#FFFFFF; --ink:#14263B; --muted:#52657A; --line:#D3DDD8;
+  --accent:#2B59E0; --accent-ink:#FFFFFF; --hl:#E6EEFF; --block:#F0A83A; --block-ink:#3A2600; --warn:#B3261E;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --text:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0F1B26;--surface:#162636;--ink:#E6EEF5;--muted:#9FB1C2;--line:#28405A;--accent:#8FB0FF;--accent-ink:#0F1B26;--hl:#1D3350;--warn:#FF8A80;}
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:4.5rem}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.6 var(--text)}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:4px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 1.25rem}
+.skip{position:absolute;left:-999px}.skip:focus{left:1rem;top:1rem;background:var(--surface);padding:.5rem 1rem;z-index:10}
+
+/* nav */
+.nav{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.nav .wrap{display:flex;align-items:center;gap:1.25rem;height:3.5rem;overflow-x:auto}
+.nav strong{font:800 1.05rem var(--display);white-space:nowrap;margin-right:auto}
+.nav a{color:var(--ink);text-decoration:none;font-weight:500;font-size:.95rem;white-space:nowrap;padding:.25rem 0;border-bottom:2px solid transparent}
+.nav a:hover{border-color:var(--accent)}
+
+/* hero */
+.hero{padding:3.5rem 0 3rem;display:grid;grid-template-columns:1.15fr .85fr;gap:3rem;align-items:center}
+.hero h1{font:800 clamp(2.8rem,7vw,5.2rem)/.98 var(--display);letter-spacing:-.03em;margin:0 0 1rem}
+.hero .lede{font-size:1.15rem;color:var(--muted);max-width:34rem;margin:0 0 1.5rem}
+.facts{display:flex;flex-wrap:wrap;gap:.5rem 2rem;margin:0;padding:0;list-style:none}
+.facts li{font-size:.95rem}.facts b{font-family:var(--display);font-size:1.5rem;display:block;line-height:1.1}
+.code-line{font:500 .95rem var(--mono);color:var(--muted);margin:0 0 1rem}
+
+/* stack demo */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.demo h2{font:600 1.05rem var(--display);margin:0 0 .25rem}
+.demo p.sub{margin:0 0 1rem;color:var(--muted);font-size:.9rem}
+.stack-box{height:250px;border-left:3px solid var(--ink);border-right:3px solid var(--ink);border-bottom:3px solid var(--ink);border-radius:0 0 8px 8px;display:flex;flex-direction:column-reverse;gap:4px;padding:6px;margin:0 auto 1rem;width:60%;position:relative;overflow:hidden}
+.item{background:var(--block);color:var(--block-ink);font:500 1rem var(--mono);text-align:center;padding:.35rem;border-radius:5px;animation:drop .22s ease-out}
+.item.top{outline:3px solid var(--accent)}
+.top-label{position:absolute;right:calc(-1 * 0px);}
+@keyframes drop{from{transform:translateY(-30px);opacity:0}to{transform:none;opacity:1}}
+.controls{display:flex;gap:.5rem;flex-wrap:wrap}
+.controls input{flex:1 1 5rem;min-width:0;padding:.55rem .7rem;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:500 1rem var(--mono)}
+button{font:600 .95rem var(--text);padding:.55rem .95rem;border-radius:8px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.alt{background:transparent;color:var(--accent)}
+button:hover{filter:brightness(1.08)}
+.status{min-height:1.5rem;margin:.75rem 0 0;font:500 .9rem var(--mono)}
+.status.err{color:var(--warn)}
+
+/* sections */
+section{padding:3rem 0;border-top:1px solid var(--line)}
+section h2{font:800 clamp(1.7rem,3.5vw,2.3rem)/1.1 var(--display);letter-spacing:-.02em;margin:0 0 1.25rem}
+section h3{font:600 1.15rem var(--display);margin:2rem 0 .75rem}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2.5rem}
+.prose{max-width:62ch}
+.co-list{list-style:none;margin:0;padding:0}
+.co-list li{display:grid;grid-template-columns:3.2rem 1fr auto;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--line);align-items:baseline}
+.co-id{font:500 .9rem var(--mono);color:var(--accent)}.co-lvl{font-size:.85rem;color:var(--muted)}
+
+/* units */
+.unit{border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:.6rem}
+.unit summary{cursor:pointer;display:flex;justify-content:space-between;gap:1rem;padding:.9rem 1.1rem;font-weight:600;list-style:none}
+.unit summary::-webkit-details-marker{display:none}
+.unit summary::after{content:"+";font:500 1.3rem var(--mono);color:var(--accent);margin-left:.5rem}
+.unit[open] summary::after{content:"\2212"}
+.u-name{flex:1}.u-meta{color:var(--muted);font-weight:400;font-size:.9rem}
+.u-body{padding:0 1.1rem 1rem}.u-body p{margin:.2rem 0 .6rem}.u-links{font-size:.9rem;color:var(--muted)}
+
+/* schedule */
+.sched-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.sched-top p{margin:0;color:var(--muted);font-size:.9rem;max-width:46ch}
+.week{display:grid;grid-template-columns:9rem 1fr;gap:1.25rem;padding:1rem 1rem;border-top:1px solid var(--line);border-left:4px solid transparent}
+.week:last-child{border-bottom:1px solid var(--line)}
+.wk-num{display:block;font:800 1.25rem var(--display)}.wk-date{display:block;color:var(--muted);font-size:.85rem}
+.wk-now{display:inline-block;margin-top:.35rem;background:var(--accent);color:var(--accent-ink);font-size:.8rem;font-weight:600;padding:.1rem .55rem;border-radius:99px}
+.week.current{background:var(--hl);border-left-color:var(--accent)}
+.wk-now[hidden]{display:none}
+.wk-body p{margin:0 0 .4rem;display:grid;grid-template-columns:7.2rem 1fr;gap:.5rem}
+.tag{font-size:.85rem;font-weight:600;color:var(--muted)}
+.tag-a{color:var(--warn)}
+.wk-assess{font-weight:500}.wk-ai{color:var(--muted);font-size:.93rem}
+
+/* tables */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:.65rem .9rem;border-bottom:1px solid var(--line);font-size:.95rem;vertical-align:top}
+thead th{background:var(--hl);font-weight:600}
+td.num{text-align:right;white-space:nowrap}
+tbody th{font:500 .9rem var(--mono);color:var(--accent);white-space:nowrap}
+.bar{display:flex;height:2.6rem;border-radius:8px;overflow:hidden;margin:0 0 .6rem;font-size:.85rem;font-weight:600}
+.bar span{display:flex;align-items:center;justify-content:center;color:var(--accent-ink);white-space:nowrap;overflow:hidden}
+.bar .b1{background:#2B59E0;color:#fff}.bar .b2{background:#1D3F9E;color:#fff}.bar .b3{background:#C77D0A;color:#fff}.bar .b4{background:#8A5606;color:#fff}
+.bar-note{color:var(--muted);font-size:.9rem;margin:0 0 1.5rem}
+
+/* resources */
+.res-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem 2.5rem}
+.res-grid ul{margin:0;padding-left:1.1rem}.res-grid li{margin-bottom:.5rem}
+.res-grid h3{margin-top:0}
+
+/* contact */
+.contact dl{display:grid;grid-template-columns:10rem 1fr;gap:.6rem 1rem;margin:0}
+.contact dt{font-weight:600}.contact dd{margin:0}
+.ph{background:var(--hl);padding:0 .35rem;border-radius:4px}
+footer{padding:2rem 0 3rem;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+
+@media (max-width:820px){
+  .hero,.two,.res-grid{grid-template-columns:1fr}
+  .hero{padding-top:2rem;gap:2rem}
+  .week{grid-template-columns:1fr;gap:.4rem}
+  .wk-head{display:flex;gap:.75rem;align-items:baseline;flex-wrap:wrap}.wk-now{margin-top:0}
+  .wk-body p{display:block}.tag{display:block}
+  .contact dl{grid-template-columns:1fr}.contact dt{margin-top:.5rem}
+}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}.item{animation:none}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<nav class="nav" aria-label="Main"><div class="wrap">
+  <strong>Data Structures</strong>
+  <a href="#overview">Overview</a><a href="#syllabus">Syllabus</a><a href="#schedule">Schedule</a><a href="#assessment">Assessment</a><a href="#resources">Resources</a><a href="#contact">Contact</a>
+</div></nav>
+
+<main id="main">
+<div class="wrap">
+  <header class="hero">
+    <div>
+      <p class="code-line">102040304 | B.Tech Computer Science and Design | Semester III</p>
+      <h1>Data Structures</h1>
+      <p class="lede">Learn how to store, organise and retrieve data efficiently: arrays, stacks, queues, linked lists, trees, graphs, sorting, searching and hashing, all implemented in C.</p>
+      <ul class="facts">
+        <li><b>4</b>credits</li><li><b>3 + 2</b>lecture and lab hours a week</li><li><b>11</b>practicals</li><li><b>150</b>total marks</li>
+      </ul>
+    </div>
+    <div class="demo" aria-labelledby="demo-h">
+      <h2 id="demo-h">Try a stack</h2>
+      <p class="sub">Last in, first out. Push a value, then pop or peek.</p>
+      <div class="stack-box" id="stack" role="list" aria-label="Stack contents, top item last"></div>
+      <div class="controls">
+        <input id="val" type="text" inputmode="numeric" maxlength="4" placeholder="value" aria-label="Value to push">
+        <button id="push">Push</button><button id="pop" class="alt">Pop</button><button id="peek" class="alt">Peek</button>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite">Stack is empty. Capacity is 6.</p>
+    </div>
+  </header>
+</div>
+
+<section id="overview"><div class="wrap">
+  <h2>Course overview</h2>
+  <div class="two">
+    <div class="prose">
+      <p>This course gives you a strong base in data structures and shows how they shape efficient algorithms. You will learn each structure's operations and applications, then practise choosing the right one for a problem.</p>
+      <p>Each week combines three lectures with one two-hour lab. Lab programs follow the lecture topic, so you write code for ideas you have just seen.</p>
+      <h3>How AI is used in this course</h3>
+      <p>Weekly activities use AI tools for practice quizzes, step-by-step tracing and code hints. You always check AI output yourself, and your submitted work must be your own. The full AI use policy will be posted here.</p>
+    </div>
+    <div>
+      <h3 style="margin-top:0">What you will be able to do</h3>
+      <ul class="co-list"><li><span class="co-id">CO1</span><span class="co-text">Explain the fundamental concepts, classification and characteristics of data structures, and estimate the time and space complexity of simple algorithms.</span><span class="co-lvl">Understand</span></li><li><span class="co-id">CO2</span><span class="co-text">Implement arrays, stacks, queues and linked lists in C, and apply stacks to expression conversion and evaluation.</span><span class="co-lvl">Apply</span></li><li><span class="co-id">CO3</span><span class="co-text">Apply tree and graph data structures to perform insertion, deletion and traversal operations.</span><span class="co-lvl">Apply</span></li><li><span class="co-id">CO4</span><span class="co-text">Implement searching and sorting algorithms and analyse their efficiency.</span><span class="co-lvl">Analyse</span></li><li><span class="co-id">CO5</span><span class="co-text">Demonstrate hashing techniques, hash functions and collision-resolution methods.</span><span class="co-lvl">Apply</span></li><li><span class="co-id">CO6</span><span class="co-text">Select and justify appropriate data structures to design solutions for real-world problems.</span><span class="co-lvl">Evaluate</span></li></ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="syllabus"><div class="wrap">
+  <h2>Syllabus</h2>
+  <p class="prose" style="margin-top:-.5rem">Six units, 40 lecture hours. Open a unit to see its topics.</p>
+  
+  <details class="unit" open>
+    <summary><span class="u-name">Unit 1: Introduction and Arrays</span><span class="u-meta">5 hours</span></summary>
+    <div class="u-body"><p>Importance and types of data structures (primitive, non-primitive, linear, non-linear); algorithms; time and space complexity; arrays, 2D arrays, matrix representation, row-major and column-major, sparse matrix, array operations.</p><p class="u-links"><strong>Outcomes:</strong> CO1, CO2 &nbsp; <strong>Practicals:</strong> P1, P2</p></div>
+  </details>
+  <details class="unit">
+    <summary><span class="u-name">Unit 2: Stack and Queue</span><span class="u-meta">9 hours</span></summary>
+    <div class="u-body"><p>Stack concept and array representation; reversing a list, parenthesis checker, Tower of Hanoi and recursion; infix, prefix and postfix notation, conversion and evaluation; queue and its types: simple, circular, priority, Deque.</p><p class="u-links"><strong>Outcomes:</strong> CO2 &nbsp; <strong>Practicals:</strong> P3, P4, P5</p></div>
+  </details>
+  <details class="unit">
+    <summary><span class="u-name">Unit 3: Linked List</span><span class="u-meta">7 hours</span></summary>
+    <div class="u-body"><p>Singly, singly circular, doubly and doubly circular lists; insertion and deletion; linked representation of stack and queue.</p><p class="u-links"><strong>Outcomes:</strong> CO2 &nbsp; <strong>Practicals:</strong> P6, P7</p></div>
+  </details>
+  <details class="unit">
+    <summary><span class="u-name">Unit 4: Trees</span><span class="u-meta">9 hours</span></summary>
+    <div class="u-body"><p>Binary tree representation and applications; binary search tree and its operations; inorder, preorder and postorder traversals; AVL tree; B and B+ trees; converting a general tree to a binary tree.</p><p class="u-links"><strong>Outcomes:</strong> CO3 &nbsp; <strong>Practicals:</strong> P8</p></div>
+  </details>
+  <details class="unit">
+    <summary><span class="u-name">Unit 5: Graph</span><span class="u-meta">4 hours</span></summary>
+    <div class="u-body"><p>Graph types (cyclic, acyclic, weighted, unweighted, directed, undirected, multigraph); adjacency matrix and list; DFS and BFS; minimum spanning trees with Prim's and Kruskal's algorithms.</p><p class="u-links"><strong>Outcomes:</strong> CO3 &nbsp; <strong>Practicals:</strong> P9</p></div>
+  </details>
+  <details class="unit">
+    <summary><span class="u-name">Unit 6: Sorting, Searching and Hashing</span><span class="u-meta">6 hours</span></summary>
+    <div class="u-body"><p>Bubble, insertion, selection, quick and merge sort; linear and binary search; symbol table, hash functions and collision-resolution techniques.</p><p class="u-links"><strong>Outcomes:</strong> CO4, CO5 &nbsp; <strong>Practicals:</strong> P10, P11</p></div>
+  </details>
+</div></section>
+
+<section id="schedule"><div class="wrap">
+  <h2>Weekly schedule</h2>
+  <div class="sched-top">
+    <p>Fifteen teaching weeks, starting Monday 20 July 2026. Dates may shift with the university calendar.</p>
+    <button class="alt" id="jump" hidden>Go to this week</button>
+  </div>
+  
+  <article class="week" id="week-1" data-start="2026-07-20">
+    <div class="wk-head"><span class="wk-num">Week 1</span><span class="wk-date">from 20 Jul</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Importance and types of data structures; algorithms, time and space complexity; arrays: concept, representation, operations</p>
+      <p><span class="tag">Lab</span>Lab orientation, C and pointer recap, GitHub set-up</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI diagnostic quiz on C basics and pointers</p>
+    </div>
+  </article>
+  <article class="week" id="week-2" data-start="2026-07-27">
+    <div class="wk-head"><span class="wk-num">Week 2</span><span class="wk-date">from 27 Jul</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>2D arrays, row-major and column-major; sparse matrix; stack concept and array representation</p>
+      <p><span class="tag">Lab</span>P1: Array operations</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>Ask AI to explain Big-O of code snippets, then verify by hand</p>
+    </div>
+  </article>
+  <article class="week" id="week-3" data-start="2026-08-03">
+    <div class="wk-head"><span class="wk-num">Week 3</span><span class="wk-date">from 3 Aug</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Stack applications: reversing a list, parenthesis checker; recursion and Tower of Hanoi; infix, prefix and postfix notation</p>
+      <p><span class="tag">Lab</span>P2: Pointers; call by value and call by reference</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Quiz 1 (Unit 1)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI-made buggy stack program to debug</p>
+    </div>
+  </article>
+  <article class="week" id="week-4" data-start="2026-08-10">
+    <div class="wk-head"><span class="wk-num">Week 4</span><span class="wk-date">from 10 Aug</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Infix to postfix conversion; postfix evaluation; queue concept and simple queue</p>
+      <p><span class="tag">Lab</span>P3: Stack using an array</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI step-tracer for expression conversion; check by hand</p>
+    </div>
+  </article>
+  <article class="week" id="week-5" data-start="2026-08-17">
+    <div class="wk-head"><span class="wk-num">Week 5</span><span class="wk-date">from 17 Aug</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Circular queue; priority queue and Deque</p>
+      <p><span class="tag">Lab</span>P4A: Infix to postfix</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Class Test 1 (Units 1 and 2)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>Gamified AI practice quiz</p>
+    </div>
+  </article>
+  <article class="week" id="week-6" data-start="2026-08-24">
+    <div class="wk-head"><span class="wk-num">Week 6</span><span class="wk-date">from 24 Aug</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Linked list concepts and types; singly linked list insertion; deletion</p>
+      <p><span class="tag">Lab</span>P4B: Postfix evaluation</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI code reviewer gives hints, not solutions</p>
+    </div>
+  </article>
+  <article class="week" id="week-7" data-start="2026-08-31">
+    <div class="wk-head"><span class="wk-num">Week 7</span><span class="wk-date">from 31 Aug</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Singly circular linked list; doubly linked list; doubly circular linked list</p>
+      <p><span class="tag">Lab</span>P5A: Simple queue</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI-generated pointer diagrams</p>
+    </div>
+  </article>
+  <article class="week" id="week-8" data-start="2026-09-07">
+    <div class="wk-head"><span class="wk-num">Week 8</span><span class="wk-date">from 7 Sept</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Linked stack and queue; trees and binary tree representation; tree traversals</p>
+      <p><span class="tag">Lab</span>P5B: Circular queue</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Assignment 1 (Units 2 and 3)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI Socratic tutor: array vs linked list</p>
+    </div>
+  </article>
+  <article class="week" id="week-9" data-start="2026-09-14">
+    <div class="wk-head"><span class="wk-num">Week 9</span><span class="wk-date">from 14 Sept</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Binary search tree insertion and search; BST deletion; AVL balancing and rotations</p>
+      <p><span class="tag">Lab</span>P6: Singly linked list</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI-generated BST and AVL practice sets</p>
+    </div>
+  </article>
+  <article class="week" id="week-10" data-start="2026-09-21">
+    <div class="wk-head"><span class="wk-num">Week 10</span><span class="wk-date">from 21 Sept</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>AVL worked examples; B-tree; B+ tree</p>
+      <p><span class="tag">Lab</span>P7: Singly circular linked list</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>Interactive tree simulation</p>
+    </div>
+  </article>
+  <article class="week" id="week-11" data-start="2026-09-28">
+    <div class="wk-head"><span class="wk-num">Week 11</span><span class="wk-date">from 28 Sept</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>General tree to binary tree; graph types and applications; adjacency matrix and list</p>
+      <p><span class="tag">Lab</span>P8: Binary search tree and traversals</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Quiz 2 (Unit 4)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI case: graph model of a campus network</p>
+    </div>
+  </article>
+  <article class="week" id="week-12" data-start="2026-10-05">
+    <div class="wk-head"><span class="wk-num">Week 12</span><span class="wk-date">from 5 Oct</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>DFS and BFS; minimum spanning trees (Prim and Kruskal)</p>
+      <p><span class="tag">Lab</span>Lab review and mini-project work</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Class Test 2 (Units 3 to 5)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI practice quiz; faculty checks the AI solutions</p>
+    </div>
+  </article>
+  <article class="week" id="week-13" data-start="2026-10-12">
+    <div class="wk-head"><span class="wk-num">Week 13</span><span class="wk-date">from 12 Oct</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Bubble and selection sort; insertion sort; quick sort</p>
+      <p><span class="tag">Lab</span>P9: DFS and BFS</p>
+      
+      <p class="wk-ai"><span class="tag">AI activity</span>AI comparison of sorting behaviour</p>
+    </div>
+  </article>
+  <article class="week" id="week-14" data-start="2026-10-19">
+    <div class="wk-head"><span class="wk-num">Week 14</span><span class="wk-date">from 19 Oct</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Merge sort and comparison of sorts; linear and binary search; hashing and collision resolution</p>
+      <p><span class="tag">Lab</span>P10: Bubble and selection sort</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Assignment 2 (Units 5 and 6)</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI hash-table collision simulator</p>
+    </div>
+  </article>
+  <article class="week" id="week-15" data-start="2026-10-26">
+    <div class="wk-head"><span class="wk-num">Week 15</span><span class="wk-date">from 26 Oct</span><span class="wk-now" hidden>This week</span></div>
+    <div class="wk-body">
+      <p class="wk-lec"><span class="tag">Lectures</span>Revision of Units 1 to 3 and 4 to 6; case-based problem solving; project showcase</p>
+      <p><span class="tag">Lab</span>P11: Binary search; practical jury and viva</p>
+      <p class="wk-assess"><span class="tag tag-a">Assessment</span>Practical jury and viva</p>
+      <p class="wk-ai"><span class="tag">AI activity</span>AI reflection summary and exit-ticket analysis</p>
+    </div>
+  </article>
+  <h3>Lab practicals</h3>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>No.</th><th>Aim</th><th class="num">When</th></tr></thead>
+    <tbody><tr><th scope="row">P1</th><td>Array: insertion, deletion, traversal, search</td><td class="num">Week 2</td></tr><tr><th scope="row">P2</th><td>Print array in reverse using pointers; call by value and by reference</td><td class="num">Week 3</td></tr><tr><th scope="row">P3</th><td>Stack using array: push, pop, peek, display</td><td class="num">Week 4</td></tr><tr><th scope="row">P4</th><td>Infix to postfix conversion; postfix evaluation</td><td class="num">Week 5 and 6</td></tr><tr><th scope="row">P5</th><td>Simple queue and circular queue using arrays</td><td class="num">Week 7 and 8</td></tr><tr><th scope="row">P6</th><td>Singly linked list: insert, delete, display</td><td class="num">Week 9</td></tr><tr><th scope="row">P7</th><td>Singly circular linked list: insert, delete, display</td><td class="num">Week 10</td></tr><tr><th scope="row">P8</th><td>Binary search tree with inorder, preorder, postorder</td><td class="num">Week 11</td></tr><tr><th scope="row">P9</th><td>DFS and BFS graph traversal</td><td class="num">Week 13</td></tr><tr><th scope="row">P10</th><td>Bubble sort and selection sort</td><td class="num">Week 14</td></tr><tr><th scope="row">P11</th><td>Binary search</td><td class="num">Week 15</td></tr></tbody>
+  </table></div>
+</div></section>
+
+<section id="assessment"><div class="wrap">
+  <h2>Assessment plan</h2>
+  <div class="bar" role="img" aria-label="Marks: theory internal 50, theory external 50, practical internal 25, practical external 25">
+    <span class="b1" style="flex:50">Theory internal 50</span><span class="b2" style="flex:50">Theory external 50</span><span class="b3" style="flex:25">Lab int. 25</span><span class="b4" style="flex:25">Lab ext. 25</span>
+  </div>
+  <p class="bar-note">150 marks in total. Passing marks: 18 in each theory part, 9 in each practical part, 54 overall.</p>
+  <div class="tbl-wrap"><table>
+    <thead><tr><th>Part</th><th>Component</th><th class="num">Marks</th><th>When</th></tr></thead>
+    <tbody><tr><td>Theory internal</td><td>Class Test 1</td><td class="num">20</td><td>Week 5</td></tr><tr><td>Theory internal</td><td>Class Test 2</td><td class="num">20</td><td>Week 12</td></tr><tr><td>Theory internal</td><td>Quizzes (2) and assignments (2)</td><td class="num">10</td><td>Weeks 3, 8, 11, 14</td></tr><tr><td>Theory external</td><td>End-semester examination</td><td class="num">50</td><td>University exam window</td></tr><tr><td>Practical internal</td><td>Lab journal and weekly evaluation</td><td class="num">15</td><td>Every week</td></tr><tr><td>Practical internal</td><td>Mini-project and jury</td><td class="num">10</td><td>Weeks 12 and 15</td></tr><tr><td>Practical external</td><td>Practical examination</td><td class="num">15</td><td>Week 15 or exam window</td></tr><tr><td>Practical external</td><td>Viva</td><td class="num">10</td><td>Week 15 or exam window</td></tr></tbody>
+  </table></div>
+</div></section>
+
+<section id="resources"><div class="wrap">
+  <h2>Learning resources</h2>
+  <div class="res-grid">
+    <div>
+      <h3>Textbooks</h3>
+      <ul>
+        <li>Data Structures using C, Tanenbaum, Langsam and Augenstein (PHI)</li>
+        <li>Data Structures through C, Yashavant Kanetkar (BPB)</li>
+        <li>Data Structures: A Pseudocode Approach with C, Richard F. Gilberg and Behrouz A. Forouzan (Thomson Course Technology)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Video courses (NPTEL)</h3>
+      <ul>
+        <li>Data Structures and Algorithms, Prof. Naveen Garg, IIT Delhi</li>
+        <li>Programming and Data Structure, Dr. P. P. Chakraborty, IIT Kharagpur</li>
+        <li><a href="https://nptel.ac.in" rel="noopener">Browse NPTEL</a></li>
+      </ul>
+    </div>
+    <div>
+      <h3>Practice and visualise</h3>
+      <ul>
+        <li><a href="https://visualgo.net" rel="noopener">VisuAlgo</a>: step-by-step animations of data structures and algorithms</li>
+        <li><a href="https://www.cs.usfca.edu/~galles/visualization/Algorithms.html" rel="noopener">Data Structure Visualizations</a> (University of San Francisco)</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Course material</h3>
+      <ul>
+        <li>Lecture slides: <span class="ph">add link</span></li>
+        <li>Lab manual and starter code: <span class="ph">add link</span></li>
+        <li>Practice question bank: <span class="ph">add link</span></li>
+      </ul>
+    </div>
+  </div>
+</div></section>
+
+<section id="contact" class="contact"><div class="wrap">
+  <h2>Contact</h2>
+  <dl>
+    <dt>Course coordinator</dt><dd><span class="ph">[Your Name], [Designation]</span></dd>
+    <dt>Email</dt><dd><span class="ph">[your.email@cvmu.edu.in]</span></dd>
+    <dt>Office hours</dt><dd><span class="ph">[Day and time], [Room / cabin]</span></dd>
+    <dt>Questions and doubts</dt><dd><span class="ph">[Course discussion group or form link]</span></dd>
+    <dt>University</dt><dd>CVM University, Faculty of Engineering &amp; Technology<br>Opp. Shastri Maidan, Beside BVM College, Vallabh Vidyanagar, Dist. Anand, Gujarat 388120<br>Phone: 02692-238001 &nbsp;|&nbsp; <a href="mailto:adminoffice@cvmu.edu.in">adminoffice@cvmu.edu.in</a> &nbsp;|&nbsp; <a href="https://www.cvmu.edu.in" rel="noopener">www.cvmu.edu.in</a></dd>
+  </dl>
+</div></section>
+</main>
+
+<footer><div class="wrap">Data Structures (102040304), curriculum version 3.0, effective from batch 2025-26. Built with AI assistance and reviewed by the course coordinator.</div></footer>
+
+<script>
+(function(){
+  /* stack demo */
+  var CAP=6, items=[], box=document.getElementById('stack'), st=document.getElementById('status'), inp=document.getElementById('val');
+  function say(m,err){st.textContent=m;st.className='status'+(err?' err':'');}
+  function draw(){
+    box.innerHTML='';
+    items.forEach(function(v,i){
+      var d=document.createElement('div');d.className='item'+(i===items.length-1?' top':'');d.setAttribute('role','listitem');d.textContent=v;box.appendChild(d);
+    });
+  }
+  document.getElementById('push').onclick=function(){
+    var v=inp.value.trim();
+    if(!v){say('Type a value first, then press Push.',true);inp.focus();return;}
+    if(items.length>=CAP){say('Overflow: the stack is full ('+CAP+' items). Pop one first.',true);return;}
+    items.push(v);inp.value='';draw();say('push('+v+')  top is now '+v+'. Size '+items.length+'.');inp.focus();
+  };
+  document.getElementById('pop').onclick=function(){
+    if(!items.length){say('Underflow: nothing to pop. Push a value first.',true);return;}
+    var v=items.pop();draw();say('pop() returned '+v+'. '+(items.length?'Top is now '+items[items.length-1]+'.':'Stack is empty.'));
+  };
+  document.getElementById('peek').onclick=function(){
+    if(!items.length){say('Stack is empty, so there is no top item.',true);return;}
+    say('peek() returned '+items[items.length-1]+'. Nothing was removed.');
+  };
+  inp.addEventListener('keydown',function(e){if(e.key==='Enter')document.getElementById('push').click();});
+
+  /* highlight current week */
+  var today=new Date(); today.setHours(0,0,0,0);
+  var weeks=[].slice.call(document.querySelectorAll('.week')), cur=null;
+  weeks.forEach(function(w){
+    var s=new Date(w.dataset.start+'T00:00:00'), e=new Date(s.getTime()+7*86400000);
+    if(today>=s&&today<e)cur=w;
+  });
+  if(cur){
+    cur.classList.add('current');cur.querySelector('.wk-now').hidden=false;
+    var j=document.getElementById('jump');j.hidden=false;j.onclick=function(){cur.scrollIntoView({behavior:'smooth',block:'center'});};
+  }
+})();
+</script>
+</body>
+</html>
