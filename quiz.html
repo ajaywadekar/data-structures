@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Structures Quest | Gamified quiz</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AE%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F5F3;--surface:#FFFFFF;--ink:#14263B;--muted:#52657A;--line:#D3DDD8;
+  --accent:#2B59E0;--accent-ink:#FFFFFF;--hl:#E6EEFF;--block:#F0A83A;--block-ink:#3A2600;
+  --ok:#17794A;--ok-bg:#DDF3E6;--bad:#B3261E;--bad-bg:#FBE3E1;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --text:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0F1B26;--surface:#162636;--ink:#E6EEF5;--muted:#9FB1C2;--line:#28405A;--accent:#8FB0FF;--accent-ink:#0F1B26;--hl:#1D3350;--ok:#6FD6A0;--ok-bg:#15382A;--bad:#FF8A80;--bad-bg:#3F1D1B;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:760px;margin:0 auto;padding:1.25rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem}
+.top a{color:var(--accent);font-weight:500;text-decoration:none}
+h1{font:800 clamp(2.2rem,6vw,3.4rem)/1 var(--display);letter-spacing:-.03em;margin:.5rem 0 .75rem}
+h2{font:800 1.6rem/1.15 var(--display);margin:0 0 .75rem;letter-spacing:-.01em}
+h3{font:600 1.05rem var(--display);margin:1.25rem 0 .5rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1.25rem}
+.lede{color:var(--muted);font-size:1.1rem;max-width:44ch}
+button{font:600 1rem var(--text);padding:.7rem 1.2rem;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.alt{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.08)}
+input[type=text]{width:100%;padding:.65rem .8rem;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font:500 1rem var(--text)}
+label{font-weight:500}
+.row{display:flex;gap:.75rem;flex-wrap:wrap;align-items:center}
+.rules{padding-left:1.1rem;margin:.5rem 0}.rules li{margin-bottom:.35rem}
+.chk{display:flex;gap:.5rem;align-items:center;margin:1rem 0}.chk input{width:1.1rem;height:1.1rem}
+
+/* HUD */
+.hud{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;margin-bottom:.9rem}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:.45rem .7rem}
+.stat b{display:block;font:800 1.35rem/1.1 var(--display)}.stat span{font-size:.8rem;color:var(--muted)}
+.prog{display:flex;gap:3px;margin-bottom:.5rem}
+.prog i{flex:1;height:8px;border-radius:4px;background:var(--line)}
+.prog i.done{background:var(--ok)}.prog i.miss{background:var(--bad)}.prog i.now{background:var(--accent)}
+.lvl{display:flex;justify-content:space-between;gap:1rem;font-size:.9rem;color:var(--muted);margin-bottom:.6rem;flex-wrap:wrap}
+.timer{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:.2rem 0 1rem}
+.timer div{height:100%;background:var(--block);width:100%}
+.timer.low div{background:var(--bad)}
+.q{font:600 1.2rem/1.4 var(--display);margin:0 0 1rem}
+.opts{display:grid;gap:.6rem;margin:0;padding:0;list-style:none}
+.opt{width:100%;text-align:left;background:var(--surface);color:var(--ink);border:2px solid var(--line);border-radius:10px;padding:.75rem .9rem;font-weight:500;display:flex;gap:.75rem}
+.opt .k{font:500 .9rem var(--mono);color:var(--accent);min-width:1.2rem}
+.opt:hover:not(:disabled){border-color:var(--accent);filter:none}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.gone{opacity:.35;text-decoration:line-through}
+.opt:disabled{cursor:default;opacity:1}.opt.gone:disabled{opacity:.35}
+.fb{margin-top:1rem;padding:.9rem 1rem;border-radius:10px;border-left:5px solid var(--accent);background:var(--hl)}
+.fb.ok{border-color:var(--ok);background:var(--ok-bg)}.fb.no{border-color:var(--bad);background:var(--bad-bg)}
+.fb p{margin:.2rem 0}
+.actions{display:flex;justify-content:space-between;gap:.75rem;margin-top:1rem;flex-wrap:wrap}
+.pill{display:inline-block;font:500 .8rem var(--mono);background:var(--hl);border-radius:99px;padding:.1rem .6rem;margin-right:.35rem}
+
+/* results */
+.big{font:800 clamp(2.6rem,9vw,4.2rem)/1 var(--display);letter-spacing:-.03em}
+.badges{display:flex;flex-wrap:wrap;gap:.5rem;list-style:none;padding:0;margin:.5rem 0}
+.badge{background:var(--block);color:var(--block-ink);font-weight:600;border-radius:10px;padding:.4rem .75rem;font-size:.95rem}
+.badge small{display:block;font-weight:400;font-size:.78rem}
+.co-row{display:grid;grid-template-columns:3rem 1fr 4.5rem;gap:.75rem;align-items:center;margin:.4rem 0}
+.co-row .bar{height:12px;background:var(--line);border-radius:6px;overflow:hidden}.co-row .bar div{height:100%;background:var(--accent)}
+.co-row .n{font:500 .9rem var(--mono)}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:.45rem .5rem;border-bottom:1px solid var(--line);font-size:.95rem}
+td.r{text-align:right}
+[hidden]{display:none !important}
+@media (max-width:560px){.hud{grid-template-columns:repeat(2,1fr)}}
+@media (prefers-reduced-motion: reduce){*{transition:none !important;animation:none !important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="pill">Data Structures (102040304)</span><a href="index.html">Back to course site</a></div>
+
+  <!-- START -->
+  <main id="start">
+    <h1>Data Structures Quest</h1>
+    <p class="lede">Sixteen questions across five levels. Earn XP, build a streak, and see which course outcomes need more practice.</p>
+    <div class="card">
+      <h2>How scoring works</h2>
+      <ul class="rules">
+        <li>Each correct answer earns XP: 100 (easy), 150 (medium), 200 (hard) or 300 (boss).</li>
+        <li>Answer quickly for up to 50 bonus XP. You have 25 seconds per question.</li>
+        <li>Every correct answer in a row raises your multiplier by 0.25, up to x2. A wrong answer resets it.</li>
+        <li>A hint removes two wrong options but costs 30 XP.</li>
+        <li>Collect badges, then check your accuracy for each course outcome (CO) at the end.</li>
+      </ul>
+      <label for="name">Your name for the leaderboard</label>
+      <input id="name" type="text" maxlength="24" placeholder="e.g. Riya P." autocomplete="off">
+      <div class="chk"><input id="practice" type="checkbox"><label for="practice">Practice mode: no timer and no time bonus</label></div>
+      <button id="go">Start quest</button>
+    </div>
+  </main>
+
+  <!-- GAME -->
+  <main id="game" hidden>
+    <div class="hud" aria-label="Your score">
+      <div class="stat"><b id="h-xp">0</b><span>XP</span></div>
+      <div class="stat"><b id="h-mult">x1.0</b><span>Multiplier</span></div>
+      <div class="stat"><b id="h-streak">0</b><span>Streak</span></div>
+      <div class="stat"><b id="h-q">1/16</b><span>Question</span></div>
+    </div>
+    <div class="prog" id="prog" aria-hidden="true"></div>
+    <div class="lvl"><span id="lvl-name"></span><span id="q-tags"></span></div>
+    <div class="timer" id="timer" aria-hidden="true"><div id="timer-bar"></div></div>
+    <div class="card">
+      <p class="q" id="q-text" tabindex="-1"></p>
+      <ul class="opts" id="opts"></ul>
+      <div class="fb" id="fb" hidden role="status" aria-live="polite"></div>
+      <div class="actions">
+        <button class="alt" id="hint">Use hint (-30 XP)</button>
+        <button id="next" hidden>Next question</button>
+      </div>
+    </div>
+    <p style="color:var(--muted);font-size:.85rem">Keyboard: press 1 to 4 to answer, Enter for the next question.</p>
+  </main>
+
+  <!-- RESULTS -->
+  <main id="end" hidden>
+    <h1 id="rank">Quest complete</h1>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <div><div class="big" id="r-xp">0</div><div style="color:var(--muted)">total XP</div></div>
+        <div><div class="big" id="r-acc">0%</div><div style="color:var(--muted)" id="r-detail"></div></div>
+      </div>
+      <h3>Badges earned</h3>
+      <ul class="badges" id="r-badges"></ul>
+      <h3>Accuracy by course outcome</h3>
+      <div id="r-co"></div>
+      <p style="color:var(--muted);font-size:.9rem" id="r-weak"></p>
+      <h3>Leaderboard on this device</h3>
+      <table><thead><tr><th>#</th><th>Name</th><th class="r">XP</th><th class="r">Accuracy</th></tr></thead><tbody id="r-lb"></tbody></table>
+      <p style="color:var(--muted);font-size:.85rem">Scores are saved only in this browser.</p>
+      <div class="row" style="margin-top:1rem">
+        <button id="again">Play again</button>
+        <button class="alt" id="review">Review answers</button>
+        <button class="alt" id="copy">Copy my result</button>
+      </div>
+      <p id="copied" style="color:var(--ok);font-weight:500" role="status" aria-live="polite"></p>
+    </div>
+    <div class="card" id="review-box" hidden style="margin-top:1rem"><h2>Answer review</h2><div id="review-list"></div></div>
+  </main>
+</div>
+
+<script>
+(function(){
+var TIME=25;
+var LEVELS=[
+  {n:"Level 1: Arrays, Stacks and Queues"},
+  {n:"Level 2: Linked Lists"},
+  {n:"Level 3: Trees and Graphs"},
+  {n:"Level 4: Sorting, Searching and Hashing"},
+  {n:"Boss round: Choose the right structure"}
+];
+var BASE={easy:100,med:150,hard:200,boss:300};
+/* lvl: level index; co: course outcome; b: Bloom level; opts[0] is the correct answer before shuffling */
+var Q=[
+ {lvl:0,co:"CO1",b:"L2",d:"easy",q:"You store 5,000 scores in an array and need the score at position 3,200. How much work does this access take, and why?",
+  o:["Constant time, O(1): the address is calculated from the base address and the index","O(n): the program walks past the first 3,199 items","O(log n): the array is halved repeatedly","O(n log n): the array must be sorted first"],
+  w:"An array stores items in consecutive memory, so address = base + index x item size. One calculation reaches any position."},
+ {lvl:0,co:"CO2",b:"L3",d:"easy",q:"A stack starts empty. These operations run in order: push(4), push(7), pop(), push(9), push(2), pop(). What does peek() return now?",
+  o:["9","2","4","7"],
+  w:"Trace: [4] > [4,7] > [4] > [4,9] > [4,9,2] > [4,9]. The top element is 9."},
+ {lvl:0,co:"CO2",b:"L3",d:"med",q:"Evaluate the postfix expression: 5 6 2 + * 12 4 / -",
+  o:["37","17","32","41"],
+  w:"6 2 + gives 8. 5 8 * gives 40. 12 4 / gives 3. 40 3 - gives 37."},
+ {lvl:0,co:"CO2",b:"L3",d:"med",q:"Which is the correct postfix form of the infix expression A + B * C - D?",
+  o:["A B C * + D -","A B + C * D -","A B C D * + -","A B * C + D -"],
+  w:"B * C binds tighter than +, so A + (B*C) becomes A B C * +. Then subtracting D (same priority as +, left to right) gives A B C * + D -."},
+ {lvl:0,co:"CO2",b:"L3",d:"easy",q:"A simple array queue says \"queue full\" even though several front slots were freed by earlier dequeues. What fixes this?",
+  o:["Make the queue circular so the rear wraps around to index 0","Replace the queue with a stack","Sort the array after every dequeue","Move the front pointer backwards"],
+  w:"In a simple queue the front slots are never reused. A circular queue wraps the rear pointer (using modulo) so freed slots are used again."},
+ {lvl:1,co:"CO2",b:"L3",d:"med",q:"You have only the head pointer of a singly linked list with n nodes. What is the time to delete the last node?",
+  o:["O(n): you must walk to the second-last node","O(1): the head knows the last node","O(log n): the list can be halved","O(n squared): each node is compared with every other"],
+  w:"A singly linked node points only forward. To unlink the last node you need the node before it, which needs a traversal from the head."},
+ {lvl:1,co:"CO2",b:"L3",d:"med",q:"To insert a new node after node p in a singly linked list, which order of pointer updates is correct?",
+  o:["new->next = p->next;  then  p->next = new;","p->next = new;  then  new->next = p->next;","new->next = p;  then  p->next = new;","p->next = new->next;  then  new->next = p;"],
+  w:"First connect the new node to the rest of the list, then link p to the new node. The other orders lose the rest of the list or create a loop."},
+ {lvl:1,co:"CO6",b:"L5",d:"hard",q:"A browser must add and remove pages at both ends of its history and move both back and forward. Which structure fits best?",
+  o:["Doubly linked list","Singly linked list","Array with shifting","Stack"],
+  w:"A doubly linked list has previous and next links, so movement in both directions and changes at either end cost O(1) once you hold the node. A stack supports only one direction."},
+ {lvl:2,co:"CO3",b:"L3",d:"med",q:"Keys 50, 30, 70, 20, 40, 60, 80 are inserted into an empty binary search tree in that order. What is the preorder traversal?",
+  o:["50 30 20 40 70 60 80","20 30 40 50 60 70 80","20 40 30 60 80 70 50","50 30 70 20 40 60 80"],
+  w:"Preorder visits root, left subtree, then right subtree. 20 30 40 50 60 70 80 is inorder, 20 40 30 60 80 70 50 is postorder and 50 30 70 20 40 60 80 is level order."},
+ {lvl:2,co:"CO3",b:"L3",d:"hard",q:"Keys 10, 20, 30 are inserted in this order into an empty AVL tree. What happens?",
+  o:["Node 10 becomes unbalanced, a single left rotation makes 20 the root","A double rotation is needed and 30 becomes the root","No rotation is needed and 10 stays the root","A right rotation makes 30 the root"],
+  w:"Inserting 30 makes a right-right chain 10 > 20 > 30. Node 10 has balance factor -2, which a single left rotation fixes. 20 becomes the root with 10 and 30 as children."},
+ {lvl:2,co:"CO3",b:"L3",d:"med",q:"Graph edges: A-B, A-C, B-D, C-D, D-E. Visit neighbours in alphabetical order. Which is the DFS order starting at A?",
+  o:["A B D C E","A B C D E","A C D B E","A B D E C"],
+  w:"DFS goes deep first: A, then B, then D. D's unvisited neighbours in alphabetical order are C, then E. A B C D E is the BFS order."},
+ {lvl:2,co:"CO3",b:"L3",d:"hard",q:"Weighted edges: A-B 4, A-C 1, B-C 2, B-D 5, C-D 8, D-E 3, C-E 9. What is the total weight of the minimum spanning tree?",
+  o:["11","10","13","15"],
+  w:"Kruskal's algorithm takes the lightest edges that do not form a cycle: A-C 1, B-C 2, D-E 3, skip A-B 4 (cycle), then B-D 5. Total 1 + 2 + 3 + 5 = 11."},
+ {lvl:3,co:"CO4",b:"L4",d:"med",q:"About how many comparisons does binary search need in the worst case on a sorted array of 1,000 items?",
+  o:["About 10","About 500","About 1,000","About 100"],
+  w:"Each comparison halves the search range, so the work is about log2(1000), which is close to 10. Linear search might need up to 1,000."},
+ {lvl:3,co:"CO4",b:"L4",d:"med",q:"A leaderboard of 1 lakh scores must be sorted and the worst-case running time must be guaranteed. Which is the safest choice?",
+  o:["Merge sort","Quick sort with the first element as pivot","Bubble sort","Selection sort"],
+  w:"Merge sort is O(n log n) in every case. Quick sort with a poor pivot, for example on already sorted data, degrades to O(n squared), and bubble and selection sort are always O(n squared)."},
+ {lvl:3,co:"CO5",b:"L3",d:"hard",q:"A hash table has 10 slots, hash h(k) = k mod 10, and linear probing. Keys 23, 43, 13 are inserted in this order. Which slot holds 13?",
+  o:["Slot 5","Slot 3","Slot 4","Slot 6"],
+  w:"23 goes to slot 3. 43 hashes to 3 (taken), so it moves to 4. 13 hashes to 3 (taken), then 4 (taken), so it lands in slot 5."},
+ {lvl:4,co:"CO6",b:"L5",d:"boss",q:"At a tech fest, gates must answer \"is ID 2317 registered?\" in under a second among 2,400 IDs. About 300 walk-ins are added during the day, and no sorted output is needed. What is the best choice?",
+  o:["Hash table keyed by ID: average O(1) search and insert","Sorted array with binary search: inserts shift many items","Singly linked list: search is O(n)","Re-sort the whole array after every walk-in"],
+  w:"Exact-match look-up with frequent inserts and no ordering need is what hashing does best. A sorted array searches fast but every insert shifts items, and a linked list searches slowly."}
+];
+var N=Q.length;
+var $=function(id){return document.getElementById(id);};
+var S;
+
+function shuffle(a){for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function show(id){["start","game","end"].forEach(function(x){$(x).hidden=(x!==id);});window.scrollTo(0,0);}
+function mult(){return Math.min(2,1+0.25*S.streak);}
+
+function newState(){
+  S={i:0,xp:0,streak:0,best:0,hints:0,fast:0,t:TIME,timer:null,locked:false,hintUsed:false,
+     name:($("name").value||"").trim()||"Player",practice:$("practice").checked,log:[],opts:[]};
+}
+function renderProg(){
+  var h="";
+  for(var k=0;k<N;k++){
+    var c=k<S.log.length?(S.log[k].ok?"done":"miss"):(k===S.i?"now":"");
+    h+='<i class="'+c+'"></i>';
+  }
+  $("prog").innerHTML=h;
+}
+function hud(){
+  $("h-xp").textContent=S.xp;$("h-mult").textContent="x"+mult().toFixed(2).replace(/0$/,"");
+  $("h-streak").textContent=S.streak;$("h-q").textContent=(Math.min(S.i+1,N))+"/"+N;
+}
+function ask(){
+  var q=Q[S.i];S.locked=false;S.hintUsed=false;
+  S.opts=shuffle(q.o.map(function(t,ix){return {t:t,ok:ix===0,gone:false};}));
+  $("lvl-name").textContent=LEVELS[q.lvl].n;
+  $("q-tags").innerHTML='<span class="pill">'+q.co+'</span><span class="pill">Bloom '+q.b+'</span><span class="pill">'+q.d+'</span>';
+  $("q-text").textContent=q.q;
+  var ul=$("opts");ul.innerHTML="";
+  S.opts.forEach(function(o,ix){
+    var li=document.createElement("li"),b=document.createElement("button");
+    b.className="opt";b.type="button";b.innerHTML='<span class="k">'+(ix+1)+'</span><span></span>';b.lastChild.textContent=o.t;
+    b.onclick=function(){answer(ix);};li.appendChild(b);ul.appendChild(li);
+  });
+  $("fb").hidden=true;$("next").hidden=true;$("hint").hidden=false;$("hint").disabled=false;
+  $("timer").hidden=S.practice;
+  renderProg();hud();
+  clearInterval(S.timer);
+  if(!S.practice){
+    S.t=TIME;tick();
+    S.timer=setInterval(function(){S.t-=0.25;tick();if(S.t<=0){clearInterval(S.timer);answer(-1);}},250);
+  }
+  $("q-text").focus({preventScroll:true});
+}
+function tick(){
+  var p=Math.max(0,S.t/TIME*100);$("timer-bar").style.width=p+"%";$("timer").className="timer"+(S.t<=8?" low":"");
+}
+function answer(ix){
+  if(S.locked)return;S.locked=true;clearInterval(S.timer);
+  var q=Q[S.i],ok=ix>=0&&S.opts[ix].ok,gain=0,timeBonus=0;
+  if(ok){
+    timeBonus=S.practice?0:Math.round(Math.max(0,S.t)/TIME*50);
+    gain=Math.max(0,Math.round((BASE[q.d]+timeBonus)*mult())-(S.hintUsed?30:0));
+    S.xp+=gain;S.streak++;S.best=Math.max(S.best,S.streak);
+    if(!S.practice&&S.t>=TIME-8)S.fast++;
+  }else{
+    if(S.hintUsed)S.xp=Math.max(0,S.xp-30);
+    S.streak=0;
+  }
+  S.log.push({i:S.i,ok:ok,co:q.co,lvl:q.lvl,d:q.d,hint:S.hintUsed,timeout:ix<0,pick:ix>=0?S.opts[ix].t:null,right:q.o[0],q:q.q,w:q.w});
+  var btns=$("opts").querySelectorAll("button");
+  S.opts.forEach(function(o,k){btns[k].disabled=true;if(o.ok)btns[k].classList.add("right");else if(k===ix)btns[k].classList.add("wrong");});
+  var fb=$("fb");fb.hidden=false;fb.className="fb "+(ok?"ok":"no");
+  var head=ok?("Correct! +"+gain+" XP"+(timeBonus?" (includes "+timeBonus+" time bonus)":"")+(mult()>1?", multiplier x"+mult().toFixed(2).replace(/0$/,""):""))
+              :(ix<0?"Time is up. The correct answer is highlighted.":"Not quite. The correct answer is highlighted.");
+  fb.innerHTML="<p><strong></strong></p><p></p>";fb.firstChild.firstChild.textContent=head;fb.lastChild.textContent=q.w;
+  $("hint").hidden=true;
+  var nx=$("next");nx.hidden=false;nx.textContent=(S.i===N-1)?"See results":"Next question";nx.focus();
+  renderProg();hud();
+}
+function hint(){
+  if(S.locked||S.hintUsed)return;S.hintUsed=true;
+  var btns=$("opts").querySelectorAll("button"),wrong=[];
+  S.opts.forEach(function(o,k){if(!o.ok)wrong.push(k);});
+  shuffle(wrong).slice(0,2).forEach(function(k){S.opts[k].gone=true;btns[k].disabled=true;btns[k].classList.add("gone");});
+  $("hint").disabled=true;
+}
+function next(){S.i++;if(S.i>=N)finish();else ask();}
+
+function badges(){
+  var b=[],right=S.log.filter(function(x){return x.ok;}).length;
+  if(S.best>=5)b.push(["On a roll","Streak of "+S.best+" correct answers"]);
+  var perfect=[];
+  LEVELS.forEach(function(L,li){var l=S.log.filter(function(x){return x.lvl===li;});if(l.length&&l.every(function(x){return x.ok;}))perfect.push(li+1);});
+  if(perfect.length)b.push(["Sharp shooter","Perfect score in level "+perfect.join(", ")]);
+  if(S.fast>=3)b.push(["Speed demon","3 correct answers within 8 seconds"]);
+  if(S.log.every(function(x){return !x.hint;}))b.push(["Lone wolf","Finished without any hint"]);
+  var boss=S.log.filter(function(x){return x.d==="boss";})[0];
+  if(boss&&boss.ok)b.push(["Boss slayer","Chose the right structure in the boss round"]);
+  if(right===N)b.push(["Flawless","All "+N+" answers correct"]);
+  return b;
+}
+function rankOf(acc){return acc>=90?"Grandmaster":acc>=70?"Architect":acc>=50?"Coder":"Trainee";}
+function lb(){try{return JSON.parse(localStorage.getItem("dsquest_lb")||"[]");}catch(e){return [];}}
+function saveLb(r){
+  try{var a=lb();a.push(r);a.sort(function(x,y){return y.xp-x.xp;});localStorage.setItem("dsquest_lb",JSON.stringify(a.slice(0,5)));}catch(e){}
+}
+function finish(){
+  clearInterval(S.timer);
+  var right=S.log.filter(function(x){return x.ok;}).length,acc=Math.round(right/N*100);
+  $("rank").textContent="Rank: "+rankOf(acc);
+  $("r-xp").textContent=S.xp;$("r-acc").textContent=acc+"%";$("r-detail").textContent=right+" of "+N+" correct";
+  var bl=$("r-badges");bl.innerHTML="";var bs=badges();
+  if(!bs.length){bl.innerHTML='<li style="color:var(--muted)">No badges this time. Try for a 5-answer streak or a level with no mistakes.</li>';}
+  bs.forEach(function(x){var li=document.createElement("li");li.className="badge";li.innerHTML="<span></span><small></small>";li.firstChild.textContent=x[0];li.lastChild.textContent=x[1];bl.appendChild(li);});
+  var cos={};S.log.forEach(function(x){cos[x.co]=cos[x.co]||{r:0,t:0};cos[x.co].t++;if(x.ok)cos[x.co].r++;});
+  var h="",weak=[];
+  Object.keys(cos).sort().forEach(function(c){
+    var p=Math.round(cos[c].r/cos[c].t*100);if(p<60)weak.push(c);
+    h+='<div class="co-row"><b>'+c+'</b><div class="bar"><div style="width:'+p+'%"></div></div><span class="n">'+cos[c].r+'/'+cos[c].t+'</span></div>';
+  });
+  $("r-co").innerHTML=h;
+  $("r-weak").textContent=weak.length?("Revisit these outcomes: "+weak.join(", ")+". Use the answer review below to see why each answer is right."):"Every outcome is at 60% or above. Try practice mode to lock in the rest.";
+  saveLb({name:S.name,xp:S.xp,acc:acc});
+  var body=$("r-lb");body.innerHTML="";
+  lb().forEach(function(r,k){var tr=document.createElement("tr");tr.innerHTML="<td>"+(k+1)+"</td><td></td><td class='r'>"+r.xp+"</td><td class='r'>"+r.acc+"%</td>";tr.children[1].textContent=r.name;body.appendChild(tr);});
+  $("review-box").hidden=true;$("copied").textContent="";
+  show("end");$("rank").setAttribute("tabindex","-1");$("rank").focus();
+}
+function review(){
+  var box=$("review-list");box.innerHTML="";
+  S.log.forEach(function(x,k){
+    var d=document.createElement("div");d.style.cssText="padding:.7rem 0;border-bottom:1px solid var(--line)";
+    d.innerHTML="<p style='margin:0'><b></b></p><p style='margin:.2rem 0'></p><p style='margin:0;color:var(--muted)'></p>";
+    d.children[0].firstChild.textContent=(k+1)+". "+(x.ok?"Correct":(x.timeout?"Time ran out":"Incorrect"))+" ("+x.co+")";
+    d.children[1].textContent=x.q;
+    d.children[2].textContent=(x.ok?"":"Answer: "+x.right+". ")+x.w;
+    box.appendChild(d);
+  });
+  $("review-box").hidden=false;$("review-box").scrollIntoView({behavior:"smooth"});
+}
+function copy(){
+  var right=S.log.filter(function(x){return x.ok;}).length;
+  var t="Data Structures Quest: "+S.xp+" XP, "+right+"/"+N+" correct ("+Math.round(right/N*100)+"%), best streak "+S.best+".";
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){$("copied").textContent="Result copied.";},function(){$("copied").textContent=t;});
+  else $("copied").textContent=t;
+}
+
+$("go").onclick=function(){newState();show("game");ask();};
+$("next").onclick=next;$("hint").onclick=hint;
+$("again").onclick=function(){show("start");};
+$("review").onclick=review;$("copy").onclick=copy;
+document.addEventListener("keydown",function(e){
+  if($("game").hidden)return;
+  if(e.target&&e.target.tagName==="INPUT")return;
+  if(e.key>="1"&&e.key<="4"&&!S.locked){var ix=parseInt(e.key,10)-1;if(S.opts[ix]&&!S.opts[ix].gone)answer(ix);}
+  else if(e.key==="Enter"&&S.locked&&!$("next").hidden&&document.activeElement!==$("next")){next();}
+});
+})();
+</script>
+</body>
+</html>
