@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course Assistant (prototype) | Data Structures (102040304)</title>
+<meta name="description" content="Prototype course assistant: FAQ answers, deadlines with calendar download, a personal task tracker and learning resources for Data Structures.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%AC%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F1F5F3;--surface:#FFFFFF;--ink:#14263B;--muted:#52657A;--line:#D3DDD8;--accent:#2B59E0;--accent-ink:#FFFFFF;--hl:#E6EEFF;--ok:#17794A;--ok-bg:#DDF3E6;--bad:#B3261E;--bad-bg:#FBE3E1;--warn-bg:#FFF2CC;
+ --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;--text:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;--mono:"IBM Plex Mono",ui-monospace,Consolas,monospace}
+@media (prefers-color-scheme: dark){:root{--bg:#0F1B26;--surface:#162636;--ink:#E6EEF5;--muted:#9FB1C2;--line:#28405A;--accent:#8FB0FF;--accent-ink:#0F1B26;--hl:#1D3350;--ok:#6FD6A0;--ok-bg:#15382A;--bad:#FF8A80;--bad-bg:#3F1D1B;--warn-bg:#3A3220}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1100px;margin:0 auto;padding:1rem 1.25rem 3rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.pill{display:inline-block;font:500 .8rem var(--mono);background:var(--hl);border-radius:99px;padding:.1rem .6rem}
+.top a{color:var(--accent);font-weight:500;text-decoration:none}
+h1{font:800 clamp(2rem,5vw,3rem)/1 var(--display);letter-spacing:-.03em;margin:.6rem 0 .4rem}
+h2{font:600 1.05rem var(--display);margin:0 0 .6rem}
+.lede{color:var(--muted);margin:0 0 .8rem;max-width:68ch}
+.proto{background:var(--warn-bg);border-left:5px solid #C77D0A;border-radius:10px;padding:.6rem .9rem;font-size:.92rem;margin:0 0 1rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem}
+.grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(300px,1fr);gap:1rem;align-items:start}
+button{font:600 .95rem var(--text);padding:.55rem .95rem;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.alt{background:transparent;color:var(--accent)}
+button:hover:not(:disabled){filter:brightness(1.08)}
+input[type=text]{flex:1;min-width:0;padding:.6rem .8rem;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:500 1rem var(--text)}
+.banner{background:var(--hl);border-left:5px solid var(--accent);border-radius:10px;padding:.6rem .9rem;margin:0 0 1rem}
+.banner.late{background:var(--bad-bg);border-color:var(--bad)}
+.banner b{font-family:var(--display)}
+#log{height:380px;overflow:auto;display:flex;flex-direction:column;gap:.6rem;padding:.2rem .1rem .6rem}
+.msg{max-width:88%;padding:.6rem .85rem;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.me{align-self:flex-end;background:var(--accent);color:var(--accent-ink);border-bottom-right-radius:3px}
+.msg.bot{align-self:flex-start;background:var(--hl);border-bottom-left-radius:3px}
+.msg.esc{background:var(--bad-bg);border-left:5px solid var(--bad)}
+.msg small{display:block;color:var(--muted);margin-top:.35rem;font-size:.8rem}
+.msg a{color:var(--accent);font-weight:500}
+.fbk{margin-top:.3rem;display:flex;gap:.3rem;align-items:center;font-size:.8rem;color:var(--muted)}
+.fbk button{padding:.1rem .5rem;font-size:.8rem}
+.chips{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+.chips button{font-weight:500;font-size:.85rem;padding:.3rem .7rem;border-radius:99px}
+form.ask{display:flex;gap:.5rem}
+.tabs{display:flex;gap:.3rem;border-bottom:1px solid var(--line);margin-bottom:.8rem;flex-wrap:wrap}
+.tabs button{background:transparent;color:var(--ink);border:none;border-bottom:3px solid transparent;border-radius:0;padding:.45rem .7rem}
+.tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent)}
+ul.tasks{list-style:none;margin:0;padding:0}
+ul.tasks li{display:flex;gap:.6rem;align-items:flex-start;padding:.45rem 0;border-bottom:1px solid var(--line)}
+ul.tasks li:last-child{border-bottom:none}
+ul.tasks input{width:1.15rem;height:1.15rem;margin-top:.2rem;accent-color:var(--accent)}
+ul.tasks .when{display:block;color:var(--muted);font-size:.85rem}
+ul.tasks .st{margin-left:auto;font-size:.78rem;font-weight:600;white-space:nowrap;padding:.05rem .5rem;border-radius:99px;background:var(--hl)}
+ul.tasks .st.late{background:var(--bad-bg);color:var(--bad)}ul.tasks .st.soon{background:var(--warn-bg)}ul.tasks .st.done{background:var(--ok-bg);color:var(--ok)}
+.bar{height:10px;background:var(--line);border-radius:6px;overflow:hidden;margin:.3rem 0 .6rem}.bar div{height:100%;background:var(--ok);width:0}
+.res{list-style:none;padding:0;margin:0}.res li{padding:.5rem 0;border-bottom:1px solid var(--line)}.res li:last-child{border:none}
+.res a{color:var(--accent);font-weight:600}.res span{display:block;color:var(--muted);font-size:.88rem}
+.sub{color:var(--muted);font-size:.88rem}
+details{margin-top:1rem}details summary{cursor:pointer;font-weight:600}
+[hidden]{display:none !important}
+@media (max-width:900px){.grid{grid-template-columns:1fr}#log{height:320px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="pill">Data Structures (102040304)</span><a href="index.html">Back to course site</a></div>
+  <h1>Course Assistant</h1>
+  <p class="lede">Ask about the schedule, assessments, practicals and resources. Check what is due, tick off your tasks and download a deadlines calendar.</p>
+  <div class="proto"><strong>Prototype.</strong> Answers come from a fixed FAQ list and simple matching, not from a live AI model. It does not send emails or store anything outside your browser. Dates are the planned weeks from the course plan; always check announcements for changes.</div>
+  <div id="banner" class="banner" hidden></div>
+
+  <div class="grid">
+    <section class="card" aria-labelledby="chat-h">
+      <h2 id="chat-h">Ask a question</h2>
+      <div id="log" role="log" aria-live="polite" aria-label="Conversation"></div>
+      <div class="chips" id="chips"></div>
+      <form class="ask" id="form" autocomplete="off">
+        <label for="q" style="position:absolute;left:-999px">Your question</label>
+        <input type="text" id="q" placeholder="e.g. When is Class Test 2?" maxlength="200">
+        <button type="submit">Ask</button>
+      </form>
+    </section>
+
+    <aside class="card">
+      <div class="tabs" role="tablist" aria-label="Tools">
+        <button role="tab" id="t1" aria-selected="true" aria-controls="p1">Deadlines</button>
+        <button role="tab" id="t2" aria-selected="false" aria-controls="p2">My tracker</button>
+        <button role="tab" id="t3" aria-selected="false" aria-controls="p3">Resources</button>
+      </div>
+      <div id="p1" role="tabpanel" aria-labelledby="t1">
+        <p class="sub" style="margin-top:0">Planned weeks from Monday 20 July 2026. The exact day is announced in class.</p>
+        <ul class="tasks" id="dl"></ul>
+        <p style="margin:.8rem 0 0"><button id="ics" class="alt">Download calendar (.ics)</button></p>
+        <p class="sub" id="icsnote" role="status" aria-live="polite"></p>
+      </div>
+      <div id="p2" role="tabpanel" aria-labelledby="t2" hidden>
+        <p class="sub" style="margin-top:0">Tick a task when you finish it. This is saved only in your browser.</p>
+        <div class="bar" aria-hidden="true"><div id="prog"></div></div>
+        <p id="progtxt" class="sub" style="margin:0 0 .5rem"></p>
+        <ul class="tasks" id="tr"></ul>
+        <p style="margin:.8rem 0 0"><button class="alt" id="reset">Clear my ticks</button></p>
+      </div>
+      <div id="p3" role="tabpanel" aria-labelledby="t3" hidden>
+        <div class="chips" id="rchips" style="margin-top:0"></div>
+        <ul class="res" id="rl"></ul>
+      </div>
+    </aside>
+  </div>
+
+  <details>
+    <summary>Unanswered questions (for the coordinator)</summary>
+    <p class="sub">Questions the assistant could not answer are kept here in your browser to show how a weekly review list would work. In a full version they go to a shared sheet.</p>
+    <ol id="una"></ol>
+  </details>
+</div>
+
+<script>
+(function(){
+"use strict";
+var START=new Date(2026,6,20); // Monday 20 July 2026: planned Week 1
+function $(i){return document.getElementById(i);}
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function wkStart(w){var d=new Date(START.getTime());d.setDate(d.getDate()+7*(w-1));return d;}
+function fmt(d){return d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"});}
+function fmtS(d){return d.toLocaleDateString("en-GB",{day:"numeric",month:"short"});}
+function today(){var d=new Date();d.setHours(0,0,0,0);return d;}
+
+/* ---------- data ---------- */
+var TASKS=[
+ {id:"p1",t:"Practical P1: array operations",w:2,k:"lab"},
+ {id:"p2",t:"Practical P2: pointers, call by value and reference",w:3,k:"lab"},
+ {id:"q1",t:"Quiz 1 (Unit 1)",w:3,k:"quiz",m:"2.5 marks"},
+ {id:"p3",t:"Practical P3: stack using an array",w:4,k:"lab"},
+ {id:"ct1",t:"Class Test 1 (Units 1 and 2)",w:5,k:"test",m:"20 marks"},
+ {id:"p4",t:"Practical P4: infix to postfix, postfix evaluation",w:6,k:"lab"},
+ {id:"p5",t:"Practical P5: simple and circular queue",w:8,k:"lab"},
+ {id:"a1",t:"Assignment 1 (Units 2 and 3)",w:8,k:"assign",m:"2.5 marks"},
+ {id:"p6",t:"Practical P6: singly linked list",w:9,k:"lab"},
+ {id:"p7",t:"Practical P7: singly circular linked list",w:10,k:"lab"},
+ {id:"q2",t:"Quiz 2 (Unit 4)",w:11,k:"quiz",m:"2.5 marks"},
+ {id:"p8",t:"Practical P8: binary search tree and traversals",w:11,k:"lab"},
+ {id:"ct2",t:"Class Test 2 (Units 3 to 5)",w:12,k:"test",m:"20 marks"},
+ {id:"p9",t:"Practical P9: DFS and BFS",w:13,k:"lab"},
+ {id:"p10",t:"Practical P10: bubble and selection sort",w:14,k:"lab"},
+ {id:"a2",t:"Assignment 2 (Units 5 and 6)",w:14,k:"assign",m:"2.5 marks"},
+ {id:"p11",t:"Practical P11: binary search",w:15,k:"lab"},
+ {id:"jury",t:"Practical jury and viva",w:15,k:"lab"}
+];
+var RES=[
+ {t:"Tree Lab: BST and AVL simulator",u:"simulator.html",n:"Step through insert, delete, traversals and rotations.",g:["tree","u4"]},
+ {t:"Data Structures Quest: gamified quiz",u:"quiz.html",n:"16 questions with CO-wise feedback.",g:["all"]},
+ {t:"Course website: weekly schedule",u:"index.html#schedule",n:"Topics, labs and tests by week.",g:["all","schedule"]},
+ {t:"VisuAlgo",u:"https://visualgo.net",n:"Animated data structures and algorithms.",g:["array","stack","queue","list","tree","graph","sort","hash","u1","u2","u3","u4","u5","u6"]},
+ {t:"Data Structure Visualizations (University of San Francisco)",u:"https://www.cs.usfca.edu/~galles/visualization/Algorithms.html",n:"Interactive visualisations for many structures.",g:["array","stack","queue","list","tree","graph","sort","hash","u1","u2","u3","u4","u5","u6"]},
+ {t:"NPTEL: Data Structures and Algorithms (Prof. Naveen Garg, IIT Delhi)",u:"https://nptel.ac.in",n:"Video lectures. Search the course title on NPTEL.",g:["all"]},
+ {t:"Textbook: Data Structures using C (Tanenbaum, Langsam, Augenstein)",u:"",n:"Reference book 1 in the syllabus.",g:["all"]},
+ {t:"Textbook: Data Structures through C (Yashavant Kanetkar)",u:"",n:"Reference book 2 in the syllabus.",g:["all"]}
+];
+var RTOPICS=[["array","Arrays","array|matrix|sparse|u1"],["stack","Stack","stack|recursion|hanoi|postfix|infix|prefix|parenthes|u2"],["queue","Queue","queue|deque|u2"],["list","Linked list","linked|list|u3"],["tree","Trees","tree|bst|avl|b-tree|traversal|u4"],["graph","Graphs","graph|bfs|dfs|mst|prim|kruskal|u5"],["sort","Sorting and searching","sort|search|bubble|merge|quick|u6"],["hash","Hashing","hash|collision|u6"]];
+
+var KB=[
+ {id:"about",q:"What is this course?",k:["course","about","overview","credits","credit","semester","102040304","what is data structures"],a:"Data Structures (102040304) is a Professional Core Course for B.Tech (Computer Science and Design), Semester III. It carries 4 credits: 3 lecture hours and 2 practical hours a week. You learn arrays, stacks, queues, linked lists, trees, graphs, sorting, searching and hashing, and implement them in C.",s:"Syllabus"},
+ {id:"units",q:"What topics are in the syllabus?",k:["syllabus","topics","units","unit","hours","chapters","contents","what will be taught"],a:"Six units, 40 lecture hours: Unit 1 Introduction and Arrays (5 h), Unit 2 Stack and Queue (9 h), Unit 3 Linked List (7 h), Unit 4 Trees (9 h), Unit 5 Graph (4 h), Unit 6 Sorting, Searching and Hashing (6 h).",s:"Syllabus"},
+ {id:"scheme",q:"How many marks is the course and what is the pass mark?",k:["marks","total marks","150","pass marks","passing","pass","scheme","examination scheme","marking scheme","how many marks"],a:"Total 150 marks. Theory: 50 internal (pass 18) and 50 external (pass 18). Practical (jury, viva, practical): 25 internal (pass 9) and 25 external (pass 9). Overall passing is 54 out of 150.",s:"Syllabus, teaching and examination scheme"},
+ {id:"internal",q:"How are internal marks divided?",k:["internal","internal marks","split","divided","breakdown","continuous assessment","ct marks","how are marks divided"],a:"As per the course plan: theory internal 50 = Class Test 1 (20) + Class Test 2 (20) + quizzes and assignments (10). Practical internal 25 = lab journal (15) + mini-project and jury (10). The coordinator will announce any change.",s:"Course plan (Part 1)"},
+ {id:"ct1",q:"When is Class Test 1?",k:["class test 1","ct1","ct-1","first test","test 1","first class test"],a:"Class Test 1 is planned for Week 5 (week of 17 Aug 2026) and covers Units 1 and 2. It carries 20 marks. The exact day is announced in class.",s:"Course calendar"},
+ {id:"ct2",q:"When is Class Test 2?",k:["class test 2","ct2","ct-2","second test","test 2","second class test"],a:"Class Test 2 is planned for Week 12 (week of 5 Oct 2026) and covers Units 3 to 5. It carries 20 marks. The exact day is announced in class.",s:"Course calendar"},
+ {id:"quizzes",q:"When are the quizzes and assignments?",k:["quiz","quizzes","assignment","assignments","submission","submit"],a:"Quiz 1 (Week 3, Unit 1), Assignment 1 (Week 8, Units 2 and 3), Quiz 2 (Week 11, Unit 4) and Assignment 2 (Week 14, Units 5 and 6). Each carries 2.5 marks.",s:"Course calendar"},
+ {id:"labs",q:"What practicals are there?",k:["practical","practicals","lab","labs","programs","experiments","journal","lab journal"],a:"There are 11 practicals, about one a week from Week 2: array operations; pointers and call by value and reference; stack; infix to postfix and postfix evaluation; simple and circular queue; singly linked list; singly circular linked list; binary search tree with traversals; DFS and BFS; bubble and selection sort; binary search. Week 15 has the practical jury and viva.",s:"Syllabus, list of practicals"},
+ {id:"lang",q:"Which programming language is used?",k:["language","which language","programming language","language used","c language","c++","python","java","compiler","ide"],a:"Practical programs are written in C, and the reference books are C-based. Ask the coordinator before using another language.",s:"Syllabus, reference books"},
+ {id:"attend",q:"What about attendance?",k:["attendance","attend","percentage","75","shortage","detained","present"],a:"Attendance is recorded in every lecture and lab. The course tracking sheet flags attendance below 75% and you may receive an email alert. The official minimum follows university rules, so please confirm it with the coordinator.",s:"Course tracking sheet"},
+ {id:"endsem",q:"What is the end-semester exam like?",k:["end semester","end-sem","endsem","final exam","external exam","exam pattern","paper pattern","university exam","exam date"],a:"The end-semester theory exam is 50 marks (pass 18). The paper pattern and date are announced by the university and the coordinator; check the course site. Revision sessions are planned in Week 15.",s:"Syllabus, course site"},
+ {id:"ai",q:"Can I use AI tools for assignments?",k:["ai","chatgpt","claude","gemini","copilot","generative","ai policy","use ai","ai tools","ai tool","artificial intelligence"],a:"You may use AI to understand concepts, get hints and check your own work. Do not submit AI-generated answers as your own, and always verify what an AI says against your notes or the textbook. The full policy will be posted on the course site.",s:"Course site"},
+ {id:"exit",q:"What is the exit ticket?",k:["exit ticket","exit-ticket","feedback","anonymous form","survey"],a:"The exit ticket is a short anonymous form at the end of the weekly class. It asks what was clear, what is still confusing and how confident you feel. It is not graded and it does not ask for your name.",s:"Course plan"},
+ {id:"cos",q:"What will I learn?",k:["outcomes","course outcomes","learning outcomes","objective","what will i learn","skills"],a:"By the end you should be able to: explain data structures and complexity; implement arrays, stacks, queues and linked lists in C; apply trees and graphs for insertion, deletion and traversal; implement and compare searching and sorting; demonstrate hashing; and choose a suitable data structure for a real problem.",s:"Course outcomes (Part 1)"},
+ {id:"sched",q:"What is the weekly schedule?",k:["schedule","timetable","weekly","calendar","plan","week","timing","timings"],a:"The course has 15 teaching weeks, planned from Monday 20 July 2026: three lectures and one two-hour lab each week. Open the Weekly schedule on the course site for topics by week. Class timings follow the official timetable.",s:"Course site"},
+ {id:"contact",q:"Who do I contact?",k:["contact","email","coordinator","teacher","faculty","professor","office hours","reach","phone"],a:"See the Contact section on the course site for the coordinator's email and office hours.",s:"Course site"}
+];
+
+var STOP=new Set("a an the is are was were be to of in on at for from and or my me i we you it this that do does did can could would should what when where who how which with about any some please tell give want need there their our your".split(" "));
+function stem(w){return w.length>3&&w.slice(-1)==="s"&&w.slice(-2)!=="ss"?w.slice(0,-1):w;}
+function tok(s){return s.toLowerCase().replace(/[^a-z0-9\s-]/g," ").split(/\s+/).filter(function(w){return w&&!STOP.has(w);}).map(stem);}
+function score(entry,qLow,qTok){
+  var sc=0,seen={};
+  entry.k.forEach(function(key){
+    if(key.indexOf(" ")>=0||key.indexOf("-")>=0){if(qLow.indexOf(key)>=0)sc+=5;}
+    else{var st=stem(key);if(!seen[st]){seen[st]=1;if(qTok.indexOf(st)>=0)sc+=3;}}
+  });
+  var qs={};tok(entry.q).forEach(function(w){if(!qs[w]){qs[w]=1;if(qTok.indexOf(w)>=0)sc+=1;}});
+  return sc;
+}
+function retrieve(q){
+  var low=q.toLowerCase(),t=tok(q),r=KB.map(function(e){return {e:e,s:score(e,low,t)};}).sort(function(a,b){return b.s-a.s;});
+  return r;
+}
+var ESC=/(recheck|re-check|revaluat|re-evaluat|marks? (is |are )?(wrong|missing|incorrect|not)|wrong marks|medical|\bill\b|sick|hospital|leave\b|extension|extend|complain|unfair|harass|stress|depress|anxi|cheat|plagiar|copied|miss(ed)? (the |my )?(test|exam|quiz|class test)|absent (for|in|from))/i;
+var HINT=/(solve|do|write|give|send|complete)( me)?( the| my)? (assignment|homework|lab program|practical program|answers?|code)|answer key/i;
+var DUE=/(what('s| is)? (due|next|pending|coming)|upcoming|due soon|next (test|quiz|assignment|deadline)|deadlines?)/i;
+var MINE=/(my (tasks?|pending|progress|to-?do)|what have i (done|completed)|pending work)/i;
+var RESQ=/(resource|notes|material|video|link|study|practice|where can i (read|find|learn)|refer|simulator|visuali)/i;
+var HELLO=/^(hi|hello|hey|namaste|good (morning|afternoon|evening)|thanks?|thank you|ok|okay)\b/i;
+
+/* ---------- storage ---------- */
+function load(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d;}catch(e){return d;}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+var done=load("dsassist_done",{}),unanswered=load("dsassist_una",[]),fb=load("dsassist_fb",{up:0,down:0});
+
+/* ---------- task status ---------- */
+function due(t){var d=wkStart(t.w);d.setDate(d.getDate()+4);return d;} // Friday of the week
+function status(t){
+  if(done[t.id])return {c:"done",l:"Done"};
+  var dd=due(t),n=today(),days=Math.round((dd-n)/86400000);
+  if(days<0)return {c:"late",l:"Overdue"};
+  if(days<=7)return {c:"soon",l:days===0?"Due today":"Due in "+days+" d"};
+  return {c:"",l:"Upcoming"};
+}
+function nextDue(n){
+  return TASKS.filter(function(t){return !done[t.id]&&due(t)>=today();}).sort(function(a,b){return due(a)-due(b);}).slice(0,n);
+}
+function overdue(){return TASKS.filter(function(t){return !done[t.id]&&due(t)<today();});}
+
+/* ---------- render side panels ---------- */
+function row(t,box){
+  var s=status(t),ws=wkStart(t.w);
+  return '<li>'+(box?'<input type="checkbox" id="c-'+t.id+'" data-id="'+t.id+'"'+(done[t.id]?' checked':'')+' aria-label="Mark '+esc(t.t)+' as done">':'')+
+   '<label'+(box?' for="c-'+t.id+'"':'')+' style="font-weight:500">'+esc(t.t)+'<span class="when">Week '+t.w+' (week of '+fmtS(ws)+')'+(t.m?' | '+t.m:'')+'</span></label><span class="st '+s.c+'">'+s.l+'</span></li>';
+}
+function renderDeadlines(){
+  var imp=TASKS.filter(function(t){return t.k!=="lab";});
+  $("dl").innerHTML=imp.map(function(t){return row(t,false);}).join("");
+}
+function renderTracker(){
+  $("tr").innerHTML=TASKS.map(function(t){return row(t,true);}).join("");
+  var n=TASKS.filter(function(t){return done[t.id];}).length;
+  $("prog").style.width=(n/TASKS.length*100)+"%";$("progtxt").textContent=n+" of "+TASKS.length+" tasks done";
+  $("tr").querySelectorAll("input").forEach(function(c){c.onchange=function(){done[c.dataset.id]=c.checked;if(!c.checked)delete done[c.dataset.id];save("dsassist_done",done);refresh();};});
+}
+function renderBanner(){
+  var b=$("banner"),od=overdue(),nx=nextDue(5).filter(function(t){return Math.round((due(t)-today())/86400000)<=7;});
+  if(!od.length&&!nx.length){b.hidden=true;return;}
+  b.hidden=false;b.className="banner"+(od.length?" late":"");
+  var h="";
+  if(od.length)h+="<b>Overdue ("+od.length+"):</b> "+od.slice(0,3).map(function(t){return esc(t.t);}).join("; ")+(od.length>3?" and more":"")+". Tick them in My tracker if you have finished them.<br>";
+  if(nx.length)h+="<b>Due within 7 days:</b> "+nx.map(function(t){return esc(t.t);}).join("; ")+".";
+  b.innerHTML=h;
+}
+function renderRes(tag){
+  var list=RES.filter(function(r){return !tag||tag==="all"||r.g.indexOf(tag)>=0||r.g.indexOf("all")>=0;});
+  $("rl").innerHTML=list.map(function(r){return "<li>"+(r.u?'<a href="'+esc(r.u)+'"'+(r.u.indexOf("http")===0?' rel="noopener" target="_blank"':'')+'>'+esc(r.t)+"</a>":"<strong>"+esc(r.t)+"</strong>")+"<span>"+esc(r.n)+"</span></li>";}).join("");
+}
+function renderChips(){
+  var h='<button class="alt" data-t="all">All</button>'+RTOPICS.map(function(x){return '<button class="alt" data-t="'+x[0]+'">'+x[1]+'</button>';}).join("");
+  $("rchips").innerHTML=h;
+  $("rchips").querySelectorAll("button").forEach(function(b){b.onclick=function(){renderRes(b.dataset.t);};});
+}
+function refresh(){renderDeadlines();renderTracker();renderBanner();}
+
+/* ---------- chat ---------- */
+function say(html,cls,src,qtext){
+  var d=document.createElement("div");d.className="msg "+(cls||"bot");d.innerHTML=html+(src?"<small>Source: "+esc(src)+"</small>":"");
+  if(cls==="bot"&&src){
+    var f=document.createElement("div");f.className="fbk";f.innerHTML='Helpful? <button class="alt" data-v="up" aria-label="Helpful">Yes</button><button class="alt" data-v="down" aria-label="Not helpful">No</button>';
+    f.querySelectorAll("button").forEach(function(b){b.onclick=function(){fb[b.dataset.v]++;save("dsassist_fb",fb);f.textContent="Thanks for the feedback.";};});
+    d.appendChild(f);
+  }
+  $("log").appendChild(d);$("log").scrollTop=$("log").scrollHeight;
+}
+function ask(q){
+  q=q.trim();if(!q)return;
+  say(esc(q),"me");
+  var low=q.toLowerCase();
+  if(HELLO.test(q)&&q.split(/\s+/).length<=4){say("Hello! I can answer questions about the course, show what is due, and share resources. Try one of the buttons below.","bot");return;}
+  if(ESC.test(q)){
+    say("This needs a person, not a chatbot. Please email the coordinator (see the Contact section of the course site) with your enrolment number and details. In a full version this question would be logged and the coordinator notified. I have not changed any marks, attendance or dates.","bot esc");
+    return;
+  }
+  if(HINT.test(q)){
+    say("I will not give answers or code to submit as your own. I can explain the concept, give a hint, or check an idea you have tried. Tell me which topic you are stuck on, for example \"explain how circular queue wrap-around works\". Try Tree Lab or the quiz for practice.","bot",null);
+    return;
+  }
+  if(MINE.test(q)){
+    var n=TASKS.filter(function(t){return done[t.id];}).length,od=overdue(),nx=nextDue(3);
+    say("In your tracker (saved in this browser): "+n+" of "+TASKS.length+" tasks done."+(od.length?"\nOverdue: "+od.slice(0,4).map(function(t){return t.t;}).join("; ")+".":"\nNothing overdue.")+(nx.length?"\nNext: "+nx.map(function(t){return t.t+" (week of "+fmtS(wkStart(t.w))+")";}).join("; ")+".":""),"bot","My tracker");
+    return;
+  }
+  if(DUE.test(q)){
+    var nx2=nextDue(4);
+    say(nx2.length?"Next on the plan:\n"+nx2.map(function(t){return "- "+t.t+": Week "+t.w+" (week of "+fmtS(wkStart(t.w))+")"+(t.m?", "+t.m:"");}).join("\n")+"\nThe exact day is announced in class.":"Nothing is left on the planned calendar. If the semester has changed, check the course site.","bot","Course calendar");
+    return;
+  }
+  if(RESQ.test(q)){
+    var tag=null;RTOPICS.forEach(function(x){if(!tag&&new RegExp(x[2],"i").test(low))tag=x[0];});
+    var list=RES.filter(function(r){return !tag||r.g.indexOf(tag)>=0;}).slice(0,5);
+    say("Here are some resources"+(tag?" for "+RTOPICS.filter(function(x){return x[0]===tag;})[0][1].toLowerCase():"")+":\n"+list.map(function(r){return "- "+r.t+(r.u?" ("+r.u+")":"");}).join("\n"),"bot","Resources");
+    if(tag){$("t3").click();renderRes(tag);}
+    return;
+  }
+  var r=retrieve(q),best=r[0];
+  if(best.s>=3){
+    var rel=r.slice(1,3).filter(function(x){return x.s>=3;});
+    say(esc(best.e.a)+(rel.length?"\n\nRelated: "+rel.map(function(x){return esc(x.e.q);}).join(" | "):""),"bot",best.e.s);
+    return;
+  }
+  unanswered.push({q:q,t:new Date().toISOString()});save("dsassist_una",unanswered);renderUna();
+  say("I'm not sure about that, and I do not want to guess. Please ask the coordinator (see the Contact section of the course site). I have added your question to the list the coordinator reviews each week.","bot esc");
+}
+function renderUna(){
+  $("una").innerHTML=unanswered.length?unanswered.slice(-20).map(function(u){return "<li>"+esc(u.q)+"</li>";}).join(""):"<li style='list-style:none' class='sub'>None yet.</li>";
+}
+$("form").onsubmit=function(e){e.preventDefault();var v=$("q").value;$("q").value="";ask(v);$("q").focus();};
+var CH=["What is due next?","How are internal marks divided?","When is Class Test 2?","Resources for AVL trees","What practicals are there?","Can I use AI tools for assignments?","I want my marks rechecked"];
+$("chips").innerHTML=CH.map(function(c){return '<button class="alt" type="button">'+esc(c)+'</button>';}).join("");
+$("chips").querySelectorAll("button").forEach(function(b,i){b.onclick=function(){ask(CH[i]);};});
+
+/* ---------- tabs, ics, reset ---------- */
+["t1","t2","t3"].forEach(function(id,i){$(id).onclick=function(){["t1","t2","t3"].forEach(function(x,j){$(x).setAttribute("aria-selected",i===j?"true":"false");$("p"+(j+1)).hidden=(i!==j);});};});
+function pad(n){return (n<10?"0":"")+n;}
+function ymd(d){return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate());}
+$("ics").onclick=function(){
+  var L=["BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//DS102040304//Course Assistant//EN","CALSCALE:GREGORIAN"];
+  TASKS.filter(function(t){return t.k!=="lab";}).forEach(function(t){
+    var s=wkStart(t.w),e=new Date(s.getTime());e.setDate(e.getDate()+5);
+    L.push("BEGIN:VEVENT","UID:"+t.id+"-ds102040304@course","DTSTAMP:"+ymd(new Date())+"T000000Z","DTSTART;VALUE=DATE:"+ymd(s),"DTEND;VALUE=DATE:"+ymd(e),
+      "SUMMARY:"+t.t.replace(/[,;]/g," "),"DESCRIPTION:Planned for Week "+t.w+". Exact day announced in class.",
+      "BEGIN:VALARM","TRIGGER:-P2D","ACTION:DISPLAY","DESCRIPTION:Coming up this week","END:VALARM","END:VEVENT");
+  });
+  L.push("END:VCALENDAR");
+  var blob=new Blob([L.join("\r\n")],{type:"text/calendar"}),a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="data-structures-deadlines.ics";document.body.appendChild(a);a.click();document.body.removeChild(a);
+  $("icsnote").textContent="Calendar downloaded. Events span the planned week and remind you 2 days before it starts.";
+};
+$("reset").onclick=function(){done={};save("dsassist_done",done);refresh();};
+
+/* ---------- init ---------- */
+window.CourseAssistant={retrieve:retrieve,tok:tok,KB:KB,ESC:ESC,HINT:HINT,DUE:DUE,MINE:MINE,RESQ:RESQ};
+refresh();renderRes();renderChips();renderUna();
+say("Hello! I am a prototype assistant for Data Structures. Ask me about marks, tests, practicals or resources, or use the buttons below.","bot");
+})();
+</script>
+</body>
+</html>
