@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tree Lab: BST and AVL Simulator | Data Structures (102040304)</title>
+<meta name="description" content="Interactive simulator for binary search trees and AVL trees: step through insertion, deletion, search, traversals and rotations, then test yourself with challenges.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F1F5F3;--surface:#FFFFFF;--ink:#14263B;--muted:#52657A;--line:#D3DDD8;
+  --accent:#2B59E0;--accent-ink:#FFFFFF;--hl:#E6EEFF;--block:#F0A83A;--block-ink:#3A2600;
+  --ok:#17794A;--ok-bg:#DDF3E6;--bad:#B3261E;--bad-bg:#FBE3E1;
+  --display:"Bricolage Grotesque","Segoe UI",system-ui,sans-serif;
+  --text:"IBM Plex Sans","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--bg:#0F1B26;--surface:#162636;--ink:#E6EEF5;--muted:#9FB1C2;--line:#28405A;--accent:#8FB0FF;--accent-ink:#0F1B26;--hl:#1D3350;--ok:#6FD6A0;--ok-bg:#15382A;--bad:#FF8A80;--bad-bg:#3F1D1B;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 1rem/1.55 var(--text)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+.wrap{max-width:1180px;margin:0 auto;padding:1rem 1.25rem 3rem}
+.top{display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap}
+.pill{display:inline-block;font:500 .8rem var(--mono);background:var(--hl);border-radius:99px;padding:.1rem .6rem}
+.top a{color:var(--accent);font-weight:500;text-decoration:none}
+h1{font:800 clamp(2rem,5vw,3rem)/1 var(--display);letter-spacing:-.03em;margin:.6rem 0 .4rem}
+h2{font:600 1.05rem var(--display);margin:0 0 .6rem}
+.lede{color:var(--muted);margin:0 0 1rem;max-width:62ch}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:1rem}
+button{font:600 .95rem var(--text);padding:.55rem .9rem;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);cursor:pointer}
+button.alt{background:transparent;color:var(--accent)}
+button:disabled{opacity:.45;cursor:not-allowed}
+button:hover:not(:disabled){filter:brightness(1.08)}
+input[type=number],input[type=text]{padding:.5rem .7rem;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font:500 1rem var(--mono);min-width:0}
+input[type=number]{width:7.5rem}
+input[type=range]{accent-color:var(--accent)}
+label{font-weight:500}
+.tabs{display:flex;gap:.4rem;margin:1rem 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.tabs button{background:transparent;color:var(--ink);border:none;border-bottom:3px solid transparent;border-radius:0;padding:.55rem .9rem}
+.tabs button[aria-selected=true]{border-bottom-color:var(--accent);color:var(--accent)}
+.mode{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.mode label{display:inline-flex;gap:.35rem;align-items:center;border:1px solid var(--line);border-radius:99px;padding:.25rem .8rem;background:var(--surface);cursor:pointer}
+.mode input:checked + span{color:var(--accent);font-weight:600}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:1rem;align-items:start}
+.canvas{padding:.5rem}
+svg.tree{width:100%;height:auto;min-height:260px;max-height:520px;display:block}
+.edge{stroke:var(--muted);stroke-width:2}
+.node circle{fill:var(--surface);stroke:var(--ink);stroke-width:2}
+.node text.k{fill:var(--ink);font:600 15px var(--mono);text-anchor:middle;dominant-baseline:central}
+.node text.bf{fill:var(--muted);font:500 11px var(--mono);text-anchor:middle}
+.node text.bfbad{fill:var(--bad);font-weight:700}
+.node.trail circle{fill:var(--hl);stroke:var(--accent)}
+.node.done circle{fill:var(--ok-bg);stroke:var(--ok)}
+.node.cur circle{fill:var(--accent);stroke:var(--accent)}.node.cur text.k{fill:var(--accent-ink)}
+.node.nw circle,.node.found circle{fill:var(--ok);stroke:var(--ok)}.node.nw text.k,.node.found text.k{fill:var(--accent-ink)}
+.node.rot circle{fill:var(--block);stroke:var(--block)}.node.rot text.k{fill:var(--block-ink)}
+.node.bad circle{fill:var(--bad);stroke:var(--bad)}.node.bad text.k{fill:var(--accent-ink)}
+.node.del circle{fill:var(--bad-bg);stroke:var(--bad);stroke-dasharray:4 3}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem 1rem;padding:.4rem .6rem .2rem;font-size:.85rem;color:var(--muted)}
+.legend i{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;margin-right:.3rem;vertical-align:-1px;border:2px solid var(--ink)}
+.player{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin:.8rem 0}
+.player .grow{flex:1;min-width:8rem;display:flex;gap:.5rem;align-items:center;font-size:.9rem;color:var(--muted)}
+.msg{background:var(--hl);border-left:5px solid var(--accent);border-radius:10px;padding:.8rem 1rem;min-height:3.6rem}
+.msg b{display:block;font-family:var(--display)}
+.out{margin:.7rem 0 0;padding:.6rem .9rem;border:1px dashed var(--accent);border-radius:10px;font:500 1rem var(--mono);overflow-wrap:anywhere}
+.out span{color:var(--muted);font-family:var(--text);font-size:.85rem}
+.side{display:grid;gap:1rem}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center;margin-bottom:.6rem}
+.chk{display:flex;gap:.45rem;align-items:center;margin:.35rem 0;font-weight:400}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;text-align:center}
+.stats b{display:block;font:800 1.4rem/1.1 var(--display)}.stats span{font-size:.8rem;color:var(--muted)}
+.status{font-size:.9rem;min-height:1.3rem;margin:.2rem 0 0;color:var(--muted)}.status.err{color:var(--bad);font-weight:500}
+ol.log{margin:0;padding-left:1.4rem;max-height:240px;overflow:auto;font-size:.9rem}
+ol.log li{padding:.15rem .3rem;border-radius:6px;cursor:pointer}
+ol.log li.on{background:var(--hl);font-weight:600}
+ol.log li:hover{background:var(--hl)}
+.sub{color:var(--muted);font-size:.88rem;margin:0 0 .6rem}
+
+.chal{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr);gap:1rem;align-items:start}
+.opts{display:grid;gap:.5rem}
+.opts button{text-align:left;background:var(--surface);color:var(--ink);border:2px solid var(--line)}
+.opts button:hover:not(:disabled){border-color:var(--accent)}
+.opts button.right{border-color:var(--ok);background:var(--ok-bg)}.opts button.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.fb{margin-top:.8rem;padding:.7rem .9rem;border-radius:10px;border-left:5px solid var(--accent);background:var(--hl)}
+.fb.ok{border-color:var(--ok);background:var(--ok-bg)}.fb.no{border-color:var(--bad);background:var(--bad-bg)}
+.score{display:flex;gap:1.2rem;font-size:.9rem;color:var(--muted)}.score b{color:var(--ink);font-family:var(--display);font-size:1.15rem}
+table{border-collapse:collapse;width:100%;font-size:.93rem}th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--line);vertical-align:top}
+thead th{background:var(--hl)}
+.guide{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.guide ul{margin:.3rem 0;padding-left:1.2rem}
+code{font-family:var(--mono);font-size:.9em;background:var(--hl);padding:0 .3rem;border-radius:4px}
+[hidden]{display:none !important}
+@media (max-width:900px){.grid,.chal,.guide{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top"><span class="pill">Data Structures (102040304) | Unit 4: Trees | CO3</span><a href="index.html">Back to course site</a></div>
+  <h1>Tree Lab</h1>
+  <p class="lede">Build a binary search tree or an AVL tree one step at a time. Watch comparisons, balance factors and rotations, then test your prediction in the Challenge tab.</p>
+
+  <div class="mode" role="radiogroup" aria-label="Tree type">
+    <strong style="margin-right:.4rem">Tree type</strong>
+    <label><input type="radio" name="mode" value="avl" checked><span>AVL tree (self-balancing)</span></label>
+    <label><input type="radio" name="mode" value="bst"><span>Plain BST</span></label>
+  </div>
+
+  <div class="tabs" role="tablist" aria-label="Sections">
+    <button role="tab" id="t-sim" aria-selected="true" aria-controls="p-sim">Simulate</button>
+    <button role="tab" id="t-chal" aria-selected="false" aria-controls="p-chal">Challenge</button>
+    <button role="tab" id="t-guide" aria-selected="false" aria-controls="p-guide">Quick guide</button>
+  </div>
+
+  <!-- SIMULATE -->
+  <section id="p-sim" role="tabpanel" aria-labelledby="t-sim">
+    <div class="grid">
+      <div>
+        <div class="card canvas">
+          <svg id="cv" class="tree" role="img" aria-label="Empty tree"></svg>
+          <div class="legend" aria-hidden="true">
+            <span><i style="background:var(--accent)"></i>Being checked</span>
+            <span><i style="background:var(--hl);border-color:var(--accent)"></i>Path</span>
+            <span><i style="background:var(--ok)"></i>New or found</span>
+            <span><i style="background:var(--block)"></i>Rotating</span>
+            <span><i style="background:var(--bad)"></i>Out of balance</span>
+            <span><i style="background:var(--ok-bg);border-color:var(--ok)"></i>Visited</span>
+          </div>
+        </div>
+        <div class="player" role="group" aria-label="Playback controls">
+          <button class="alt" id="first" title="Back to the first step">First</button>
+          <button class="alt" id="prev">Previous</button>
+          <button id="play">Play</button>
+          <button class="alt" id="next">Next</button>
+          <div class="grow"><label for="speed">Speed</label><input type="range" id="speed" min="1" max="5" value="3" aria-label="Playback speed"><span id="stepno" aria-live="off"></span></div>
+        </div>
+        <div class="msg" id="msg" role="status" aria-live="polite"><b>Welcome</b>Type a number and press Insert, or load an example.</div>
+        <div class="out" id="out" hidden></div>
+      </div>
+
+      <div class="side">
+        <div class="card">
+          <h2>Operations</h2>
+          <div class="row">
+            <label for="key" class="sr" style="position:absolute;left:-999px">Key (1 to 99)</label>
+            <input type="number" id="key" min="1" max="99" placeholder="1 to 99">
+            <button id="ins">Insert</button><button class="alt" id="del">Delete</button><button class="alt" id="srch">Search</button>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+          <h2 style="margin-top:.6rem">Traversals</h2>
+          <div class="row">
+            <button class="alt" data-t="in">Inorder</button><button class="alt" data-t="pre">Preorder</button><button class="alt" data-t="post">Postorder</button><button class="alt" data-t="level">Level order</button>
+          </div>
+          <h2>Examples</h2>
+          <div class="row">
+            <button class="alt" id="ex-asc">Ascending 10 to 70</button>
+            <button class="alt" id="ex-rand">Random tree</button>
+            <button class="alt" id="ex-clear">Clear</button>
+          </div>
+          <label class="chk"><input type="checkbox" id="auto" checked> Play automatically</label>
+          <label class="chk"><input type="checkbox" id="showbf" checked> Show balance factors</label>
+        </div>
+        <div class="card">
+          <h2>This tree</h2>
+          <div class="stats"><div><b id="s-n">0</b><span>nodes</span></div><div><b id="s-h">0</b><span>height</span></div><div><b id="s-b">Yes</b><span>balanced</span></div></div>
+          <p class="sub" style="margin-top:.6rem" id="s-note"></p>
+        </div>
+        <div class="card">
+          <h2>Steps of this operation</h2>
+          <ol class="log" id="log"></ol>
+          <div class="row" style="margin:.7rem 0 0"><button class="alt" id="aiprompt">Copy AI tutor prompt</button></div>
+          <p class="sub" id="aicopied" role="status" aria-live="polite" style="margin:.4rem 0 0">Copies a ready-made question about the current step. Paste it into any AI assistant to get an explanation and a check question.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE -->
+  <section id="p-chal" role="tabpanel" aria-labelledby="t-chal" hidden>
+    <div class="chal">
+      <div class="card canvas"><svg id="cv2" class="tree" role="img" aria-label="Challenge tree"></svg></div>
+      <div class="card">
+        <div class="row">
+          <button id="c-trav">New traversal question</button>
+          <button id="c-rot">New rotation question</button>
+        </div>
+        <div class="score" aria-label="Score"><span><b id="c-ok">0</b> correct</span><span><b id="c-all">0</b> attempted</span><span><b id="c-st">0</b> streak</span></div>
+        <h2 style="margin-top:1rem" id="c-q">Choose a question type to begin.</h2>
+        <p class="sub" id="c-sub">Traversal questions ask you to write the visiting order. Rotation questions ask which case an AVL insertion triggers.</p>
+        <div id="c-ans" hidden></div>
+        <div class="fb" id="c-fb" hidden role="status" aria-live="polite"></div>
+        <div class="row" style="margin-top:.8rem">
+          <button class="alt" id="c-hint" hidden>Hint</button>
+          <button class="alt" id="c-show" hidden>Show me in the simulator</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GUIDE -->
+  <section id="p-guide" role="tabpanel" aria-labelledby="t-guide" hidden>
+    <div class="guide">
+      <div class="card">
+        <h2>Binary search tree rules</h2>
+        <ul>
+          <li>Every key in the left subtree is smaller than the node. Every key in the right subtree is larger.</li>
+          <li>Search and insert follow one path from the root, so the cost is the height of the tree.</li>
+          <li>Delete has three cases: leaf (remove it), one child (the child takes its place), two children (copy the inorder successor, the smallest key in the right subtree, then remove that successor).</li>
+          <li>Inorder traversal of a BST always gives sorted order.</li>
+        </ul>
+        <h2 style="margin-top:1rem">Traversals</h2>
+        <table><thead><tr><th>Name</th><th>Order</th></tr></thead><tbody>
+          <tr><td>Preorder</td><td>Node, left, right</td></tr>
+          <tr><td>Inorder</td><td>Left, node, right</td></tr>
+          <tr><td>Postorder</td><td>Left, right, node</td></tr>
+          <tr><td>Level order</td><td>Row by row, left to right</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h2>AVL tree rules</h2>
+        <ul>
+          <li>Balance factor = height of left subtree minus height of right subtree.</li>
+          <li>A node is balanced when its balance factor is -1, 0 or 1. Outside that range the tree rotates.</li>
+          <li>Inserting in ascending order turns a plain BST into a chain with height n. An AVL tree stays near log n.</li>
+        </ul>
+        <table><thead><tr><th>Case</th><th>Shape</th><th>Fix</th></tr></thead><tbody>
+          <tr><td>LL</td><td>Left child is left-heavy or balanced</td><td>Rotate right at the unbalanced node</td></tr>
+          <tr><td>RR</td><td>Right child is right-heavy or balanced</td><td>Rotate left at the unbalanced node</td></tr>
+          <tr><td>LR</td><td>Left child is right-heavy</td><td>Rotate left at the child, then right at the node</td></tr>
+          <tr><td>RL</td><td>Right child is left-heavy</td><td>Rotate right at the child, then left at the node</td></tr>
+        </tbody></table>
+        <p class="sub" style="margin-top:.8rem">Tip: predict the result before pressing Play. Then compare it with the steps list.</p>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+var uid=0, MAXN=31;
+var reduce=window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function $(id){return document.getElementById(id);}
+function mk(k){return {id:++uid,k:k,l:null,r:null};}
+function clone(n){return n?{id:n.id,k:n.k,l:clone(n.l),r:clone(n.r)}:null;}
+function ht(n){return n?1+Math.max(ht(n.l),ht(n.r)):0;}
+function bf(n){return ht(n.l)-ht(n.r);}
+function count(n){return n?1+count(n.l)+count(n.r):0;}
+function inorder(n,a){a=a||[];if(n){inorder(n.l,a);a.push(n.k);inorder(n.r,a);}return a;}
+function preorder(n,a){a=a||[];if(n){a.push(n.k);preorder(n.l,a);preorder(n.r,a);}return a;}
+function postorder(n,a){a=a||[];if(n){postorder(n.l,a);postorder(n.r,a);a.push(n.k);}return a;}
+function levelorder(n){var q=n?[n]:[],a=[];while(q.length){var x=q.shift();a.push(x.k);if(x.l)q.push(x.l);if(x.r)q.push(x.r);}return a;}
+function allBalanced(n){return !n||(Math.abs(bf(n))<=1&&allBalanced(n.l)&&allBalanced(n.r));}
+function sexp(n){return n?"("+n.k+" "+sexp(n.l)+" "+sexp(n.r)+")":"-";}
+var CASENAME={LL:"left-left",RR:"right-right",LR:"left-right",RL:"right-left"};
+
+function H(o){o=o||{};return {cur:o.cur||[],trail:o.trail||[],nw:o.nw||[],bad:o.bad||[],rot:o.rot||[],found:o.found||[],del:o.del||[],done:o.done||[]};}
+
+/* ---------- operation engine: returns steps for insert, delete, search ---------- */
+function run(root,kind,key,avl){
+  var W=clone(root),steps=[],meta={cases:[],dup:false,found:false};
+  function snap(msg,o,title){steps.push({root:clone(W),hl:H(o),msg:msg,title:title||"",out:null});}
+  function relink(p,o,n){if(!p)W=n;else if(p.l===o)p.l=n;else p.r=n;}
+  function rotR(z,p){var y=z.l;z.l=y.r;y.r=z;relink(p,z,y);return y;}
+  function rotL(z,p){var y=z.r;z.r=y.l;y.l=z;relink(p,z,y);return y;}
+  function ids(a){return a.map(function(n){return n.id;});}
+
+  function rebalance(path){
+    for(var i=path.length-1;i>=0;i--){
+      var n=path[i],b=bf(n),parent=i>0?path[i-1]:null;
+      var bad=Math.abs(b)>1;
+      snap("Check "+n.k+": left height "+ht(n.l)+", right height "+ht(n.r)+", balance factor "+b+(bad?". This is outside -1 to 1, so the node is out of balance.":". Balanced, nothing to do here."),{cur:bad?[]:[n.id],bad:bad?[n.id]:[],trail:ids(path.slice(0,i))},"Balance check");
+      if(!bad)continue;
+      var c,x,k;
+      if(b>1){
+        c=n.l;
+        if(bf(c)>=0){
+          k="LL";meta.cases.push(k);
+          snap("Left-left case: "+n.k+" is left-heavy and its left child "+c.k+" is not right-heavy. One right rotation around "+n.k+" fixes it.",{bad:[n.id],rot:[c.id]},"Case LL");
+          path[i]=rotR(n,parent);
+          snap("Rotated right: "+c.k+" moves up and "+n.k+" becomes its right child. Heights are restored.",{rot:[c.id,n.id]},"Rotate right");
+        }else{
+          k="LR";meta.cases.push(k);x=c.r;
+          snap("Left-right case: "+n.k+" is left-heavy but its left child "+c.k+" is right-heavy. A single rotation would not help, so rotate twice: first left at "+c.k+", then right at "+n.k+".",{bad:[n.id],rot:[c.id,x.id]},"Case LR");
+          rotL(c,n);
+          snap("First rotation (left at "+c.k+"): "+x.k+" is now the left child of "+n.k+". The shape has become left-left.",{rot:[x.id,c.id]},"Rotate left");
+          path[i]=rotR(n,parent);
+          snap("Second rotation (right at "+n.k+"): "+x.k+" moves up with "+c.k+" on its left and "+n.k+" on its right.",{rot:[x.id,c.id,n.id]},"Rotate right");
+        }
+      }else{
+        c=n.r;
+        if(bf(c)<=0){
+          k="RR";meta.cases.push(k);
+          snap("Right-right case: "+n.k+" is right-heavy and its right child "+c.k+" is not left-heavy. One left rotation around "+n.k+" fixes it.",{bad:[n.id],rot:[c.id]},"Case RR");
+          path[i]=rotL(n,parent);
+          snap("Rotated left: "+c.k+" moves up and "+n.k+" becomes its left child. Heights are restored.",{rot:[c.id,n.id]},"Rotate left");
+        }else{
+          k="RL";meta.cases.push(k);x=c.l;
+          snap("Right-left case: "+n.k+" is right-heavy but its right child "+c.k+" is left-heavy. Rotate twice: first right at "+c.k+", then left at "+n.k+".",{bad:[n.id],rot:[c.id,x.id]},"Case RL");
+          rotR(c,n);
+          snap("First rotation (right at "+c.k+"): "+x.k+" is now the right child of "+n.k+". The shape has become right-right.",{rot:[x.id,c.id]},"Rotate right");
+          path[i]=rotL(n,parent);
+          snap("Second rotation (left at "+n.k+"): "+x.k+" moves up with "+n.k+" on its left and "+c.k+" on its right.",{rot:[x.id,n.id,c.id]},"Rotate left");
+        }
+      }
+    }
+  }
+
+  function insert(){
+    if(!W){W=mk(key);snap("The tree is empty, so "+key+" becomes the root.",{nw:[W.id]},"Insert");}
+    else{
+      var path=[],cur=W;
+      while(cur){
+        if(key===cur.k){meta.dup=true;snap(key+" is already in the tree. A BST does not store duplicates, so nothing changes.",{found:[cur.id],trail:ids(path)},"Duplicate");return fin();}
+        path.push(cur);
+        snap("Compare "+key+" with "+cur.k+": "+key+(key<cur.k?" is smaller, so go left.":" is larger, so go right."),{cur:[cur.id],trail:ids(path.slice(0,-1))},"Compare");
+        cur=key<cur.k?cur.l:cur.r;
+      }
+      var p=path[path.length-1],n=mk(key),left=key<p.k;
+      if(left)p.l=n;else p.r=n;
+      snap("Found an empty spot. Insert "+key+" as the "+(left?"left":"right")+" child of "+p.k+".",{nw:[n.id],trail:ids(path)},"Insert");
+      if(avl)rebalance(path);
+    }
+    fin();
+  }
+
+  function search(){
+    var path=[],cur=W;
+    while(cur){
+      if(key===cur.k){meta.found=true;snap("Found "+key+" after "+(path.length+1)+" comparison"+(path.length?"s":"")+".",{found:[cur.id],trail:ids(path)},"Found");return fin();}
+      path.push(cur);
+      snap("Compare "+key+" with "+cur.k+": "+key+(key<cur.k?" is smaller, so go left.":" is larger, so go right."),{cur:[cur.id],trail:ids(path.slice(0,-1))},"Compare");
+      cur=key<cur.k?cur.l:cur.r;
+    }
+    snap("Reached an empty spot, so "+key+" is not in the tree. It took "+path.length+" comparison"+(path.length===1?"":"s")+".",{trail:ids(path)},"Not found");
+    fin();
+  }
+
+  function del(){
+    var path=[],cur=W;
+    while(cur&&cur.k!==key){
+      path.push(cur);
+      snap("Compare "+key+" with "+cur.k+": "+key+(key<cur.k?" is smaller, so go left.":" is larger, so go right."),{cur:[cur.id],trail:ids(path.slice(0,-1))},"Compare");
+      cur=key<cur.k?cur.l:cur.r;
+    }
+    if(!cur){snap(key+" is not in the tree, so there is nothing to delete.",{trail:ids(path)},"Not found");return fin();}
+    var node=cur;path.push(node);
+    snap("Found "+key+". Check how many children it has.",{found:[node.id],trail:ids(path.slice(0,-1))},"Found");
+    var parent=path.length>1?path[path.length-2]:null;
+    if(!node.l&&!node.r){
+      snap(key+" is a leaf, so simply remove it.",{del:[node.id],trail:ids(path.slice(0,-1))},"Delete leaf");
+      relink(parent,node,null);path.pop();
+      snap("Removed "+key+".",{trail:ids(path)},"Delete");
+    }else if(!node.l||!node.r){
+      var ch=node.l||node.r;
+      snap(key+" has one child ("+ch.k+"). The child takes its place.",{del:[node.id],cur:[ch.id],trail:ids(path.slice(0,-1))},"Delete one child");
+      relink(parent,node,ch);path.pop();
+      snap("Removed "+key+"; "+ch.k+" now hangs from "+(parent?parent.k:"the root position")+".",{trail:ids(path)},"Delete");
+    }else{
+      var t=node.r;
+      snap(key+" has two children. Find its inorder successor: the smallest key in the right subtree. Go right to "+t.k+".",{del:[node.id],cur:[t.id],trail:ids(path.slice(0,-1))},"Two children");
+      while(t.l){
+        path.push(t);t=t.l;
+        snap("Keep going left to "+t.k+".",{del:[node.id],cur:[t.id],trail:ids(path.slice(0,-1))},"Find successor");
+      }
+      var sp=path[path.length-1],old=node.k;
+      snap("The inorder successor is "+t.k+". Copy it into the node holding "+old+".",{found:[t.id],del:[node.id],trail:ids(path)},"Successor");
+      node.k=t.k;
+      snap("The node now holds "+node.k+". Next, remove the original "+t.k+" below.",{nw:[node.id],del:[t.id],trail:ids(path)},"Copy");
+      relink(sp,t,t.r);
+      snap("Removed the original successor node. The tree is a valid BST again.",{nw:[node.id],trail:ids(path)},"Delete");
+    }
+    if(avl&&path.length)rebalance(path);
+    fin();
+  }
+
+  function fin(){
+    var n=count(W),h=ht(W);
+    var m=meta.dup?"No change.":(kind==="search"?"Search finished.":"Operation complete.");
+    snap(m+" The tree has "+n+" node"+(n===1?"":"s")+" and height "+h+(avl&&kind!=="search"?(allBalanced(W)?". It is balanced.":""):"."),{},"Done");
+    return null;
+  }
+  if(kind==="insert")insert();else if(kind==="delete")del();else search();
+  return {steps:steps,final:steps[steps.length-1].root,meta:meta};
+}
+
+/* ---------- traversal steps ---------- */
+function traverse(root,type){
+  var steps=[],out=[],done=[];
+  var names={pre:"Preorder (node, left, right)",in:"Inorder (left, node, right)",post:"Postorder (left, right, node)",level:"Level order (row by row)"};
+  function snap(msg,cur,title){steps.push({root:root,hl:H({cur:cur?[cur.id]:[],done:done.slice()}),msg:msg,title:title||"",out:out.slice(),outName:names[type]});}
+  function visit(n){out.push(n.k);done.push(n.id);snap("Visit "+n.k+": add it to the output.",n,"Visit");}
+  function go(n){
+    if(!n)return;
+    snap("Arrive at "+n.k+(type==="pre"?".":(type==="in"?". Left subtree first.":". Children first.")),n,"Arrive");
+    if(type==="pre")visit(n);
+    go(n.l);
+    if(type==="in")visit(n);
+    go(n.r);
+    if(type==="post")visit(n);
+  }
+  if(!root){steps.push({root:null,hl:H(),msg:"The tree is empty, so there is nothing to traverse.",title:"Empty",out:[],outName:names[type]});return {steps:steps,final:null,meta:{}};}
+  snap("Start at the root, "+root.k+". "+names[type]+".",root,"Start");
+  if(type==="level"){
+    steps.pop();
+    snap("Start at the root. Level order visits row by row, left to right, using a queue.",root,"Start");
+    var q=[root];
+    while(q.length){var x=q.shift();visit(x);if(x.l)q.push(x.l);if(x.r)q.push(x.r);}
+  }else{
+    steps.pop();snap("Start at the root, "+root.k+". "+names[type]+".",root,"Start");
+    go(root);
+  }
+  snap("Traversal complete. Output: "+out.join(", ")+".",null,"Done");
+  return {steps:steps,final:root,meta:{}};
+}
+
+/* ---------- canvas with tweened layout ---------- */
+function Canvas(svg){
+  var pos={},raf=0,cur={root:null,hl:H(),bf:true};
+  var GAP=52,TOP=38,LEV=72,MINW=520;
+  function layout(root){
+    var map={},edges=[],i=0,cnt=count(root);
+    (function walk(n,d,p){
+      if(!n)return;
+      walk(n.l,d+1,n);
+      map[n.id]={id:n.id,k:n.k,i:i++,d:d,bf:bf(n)};
+      if(p)edges.push([p.id,n.id]);
+      walk(n.r,d+1,n);
+    })(root,0,null);
+    var off=Math.max(0,(MINW-(cnt-1)*GAP-80)/2);
+    Object.keys(map).forEach(function(id){var m=map[id];m.x=40+off+m.i*GAP;m.y=TOP+m.d*LEV;});
+    // parents for spawn
+    (function par(n,p){if(!n)return;if(p)map[n.id].p=p.id;par(n.l,n);par(n.r,n);})(root,null);
+    return {map:map,edges:edges};
+  }
+  var lay=layout(null);
+  this.set=function(root,hl,bfOn){
+    cur.root=root;cur.hl=hl||H();cur.bf=bfOn!==false;
+    lay=layout(root);
+    var seen={};
+    Object.keys(lay.map).forEach(function(id){
+      var m=lay.map[id];seen[id]=1;
+      if(!pos[id]){var pp=m.p&&pos[m.p]?pos[m.p]:{x:m.x,y:m.y};pos[id]={x:pp.x,y:pp.y,a:reduce?1:0};}
+      if(reduce){pos[id].x=m.x;pos[id].y=m.y;pos[id].a=1;}
+    });
+    Object.keys(pos).forEach(function(id){if(!seen[id])delete pos[id];});
+    svg.setAttribute("aria-label",root?("Tree with "+count(root)+" nodes. Root "+root.k+". Inorder: "+inorder(root).join(", ")+". Structure: "+sexp(root)):"Empty tree");
+    draw();
+    if(!raf)raf=requestAnimationFrame(step);
+  };
+  function step(){
+    raf=0;var moving=false;
+    Object.keys(lay.map).forEach(function(id){
+      var m=lay.map[id],p=pos[id];if(!p)return;
+      var dx=m.x-p.x,dy=m.y-p.y;
+      if(Math.abs(dx)>.4||Math.abs(dy)>.4){p.x+=dx*.22;p.y+=dy*.22;moving=true;}else{p.x=m.x;p.y=m.y;}
+      if(p.a<1){p.a=Math.min(1,p.a+.08);moving=true;}
+    });
+    draw();
+    if(moving)raf=requestAnimationFrame(step);
+  }
+  function cls(id){
+    var h=cur.hl;
+    if(h.bad.indexOf(id)>=0)return "bad";
+    if(h.rot.indexOf(id)>=0)return "rot";
+    if(h.nw.indexOf(id)>=0)return "nw";
+    if(h.found.indexOf(id)>=0)return "found";
+    if(h.del.indexOf(id)>=0)return "del";
+    if(h.cur.indexOf(id)>=0)return "cur";
+    if(h.done.indexOf(id)>=0)return "done";
+    if(h.trail.indexOf(id)>=0)return "trail";
+    return "";
+  }
+  function draw(){
+    var maxX=MINW-40,maxY=0,s="";
+    Object.keys(pos).forEach(function(id){maxX=Math.max(maxX,pos[id].x);maxY=Math.max(maxY,pos[id].y);});
+    var w=Math.max(MINW,maxX+40),h=Math.max(250,maxY+58);
+    svg.setAttribute("viewBox","0 0 "+w+" "+h);
+    lay.edges.forEach(function(e){var a=pos[e[0]],b=pos[e[1]];if(a&&b)s+='<line class="edge" x1="'+a.x.toFixed(1)+'" y1="'+a.y.toFixed(1)+'" x2="'+b.x.toFixed(1)+'" y2="'+b.y.toFixed(1)+'" opacity="'+b.a+'"/>';});
+    Object.keys(lay.map).forEach(function(id){
+      var m=lay.map[id],p=pos[id];if(!p)return;
+      var bad=Math.abs(m.bf)>1;
+      s+='<g class="node '+cls(+id)+'" transform="translate('+p.x.toFixed(1)+','+p.y.toFixed(1)+')" opacity="'+p.a+'"><circle r="21"/><text class="k">'+m.k+'</text>'+
+         (cur.bf?'<text class="bf'+(bad?' bfbad':'')+'" y="36">bf '+m.bf+'</text>':'')+'</g>';
+    });
+    svg.innerHTML=s;
+  }
+}
+
+/* ---------- main simulator ---------- */
+var cv=new Canvas($("cv")),cv2=new Canvas($("cv2"));
+var st={mode:"avl",committed:null,steps:[{root:null,hl:H(),msg:"Type a number and press Insert, or load an example.",title:"Welcome",out:null}],idx:0,timer:null,playing:false,lastOp:""};
+function avl(){return st.mode==="avl";}
+function setStatus(t,err){var e=$("status");e.textContent=t;e.className="status"+(err?" err":"");}
+function delay(){return [1500,1100,750,480,260][+$("speed").value-1];}
+function stepRoot(i){return st.steps[i].root;}
+
+function show(i){
+  st.idx=i;var s=st.steps[i];
+  cv.set(s.root,s.hl,$("showbf").checked);
+  var m=$("msg");m.innerHTML="<b></b><span></span>";m.firstChild.textContent=s.title||"";m.lastChild.textContent=s.msg;
+  var o=$("out");
+  if(s.out){o.hidden=false;o.innerHTML="<span></span><br><strong></strong>";o.firstChild.textContent=s.outName+" output";o.lastChild.textContent=s.out.length?s.out.join("  "):"(nothing yet)";}else o.hidden=true;
+  $("stepno").textContent="Step "+(i+1)+" of "+st.steps.length;
+  $("first").disabled=$("prev").disabled=(i===0);
+  $("next").disabled=(i>=st.steps.length-1);
+  $("play").textContent=st.playing?"Pause":(i>=st.steps.length-1?"Replay":"Play");
+  var items=$("log").children;
+  for(var k=0;k<items.length;k++)items[k].className=(k===i?"on":"");
+  if(items[i]&&items[i].scrollIntoView&&st.playing)items[i].scrollIntoView({block:"nearest"});
+  var r=s.root;
+  $("s-n").textContent=count(r);$("s-h").textContent=ht(r);
+  var bal=allBalanced(r);$("s-b").textContent=bal?"Yes":"No";
+  $("s-note").textContent=r?(avl()?(bal?"Every balance factor is between -1 and 1.":"Mid-operation: an imbalance is being fixed."):(bal?"Balanced by luck. A plain BST has no guarantee.":"Unbalanced. Searches on the tall side take longer.")):"";
+}
+function buildLog(){
+  var ol=$("log");ol.innerHTML="";
+  st.steps.forEach(function(s,i){var li=document.createElement("li");li.textContent=s.msg;li.onclick=function(){pause();show(i);};ol.appendChild(li);});
+}
+function pause(){clearTimeout(st.timer);st.playing=false;}
+function schedule(){
+  st.timer=setTimeout(function(){
+    if(st.idx<st.steps.length-1){show(st.idx+1);if(st.idx<st.steps.length-1)schedule();else{st.playing=false;show(st.idx);}}
+    else{st.playing=false;show(st.idx);}
+  },delay());
+}
+function play(){
+  if(st.idx>=st.steps.length-1)show(0);
+  st.playing=true;show(st.idx);schedule();
+}
+function begin(res,autoplay){
+  pause();
+  st.steps=res.steps;st.committed=res.final;buildLog();show(0);
+  if(autoplay&&$("auto").checked&&st.steps.length>1)play();
+  else if(st.steps.length>1){}
+}
+function readKey(){
+  var v=$("key").value.trim();var n=Number(v);
+  if(v===""||!isFinite(n)||Math.floor(n)!==n||n<1||n>99){setStatus("Enter a whole number from 1 to 99.",true);$("key").focus();return null;}
+  return n;
+}
+function doOp(kind){
+  var k=readKey();if(k===null)return;
+  if(kind==="insert"&&count(st.committed)>=MAXN&&!findKey(st.committed,k)){setStatus("The simulator holds up to "+MAXN+" nodes. Delete a node or clear the tree.",true);return;}
+  setStatus("");
+  var res=run(st.committed,kind,k,avl());
+  st.lastOp=kind+" "+k;
+  begin(res,true);
+  $("key").value="";$("key").focus();
+}
+function findKey(n,k){while(n){if(n.k===k)return n;n=k<n.k?n.l:n.r;}return null;}
+function buildTree(keys,useAvl){var r=null;keys.forEach(function(k){r=run(r,"insert",k,useAvl).final;});return r;}
+function loadTree(root,note){
+  pause();st.committed=root;
+  st.steps=[{root:root,hl:H(),msg:note,title:"Loaded",out:null}];buildLog();show(0);
+}
+function sample(n,lo,hi){var a=[];while(a.length<n){var v=Math.floor(Math.random()*(hi-lo+1))+lo;if(a.indexOf(v)<0)a.push(v);}return a;}
+function setMode(m,clear){
+  st.mode=m;
+  document.querySelector('input[name=mode][value='+m+']').checked=true;
+  if(clear){loadTree(null,"Switched to "+(m==="avl"?"AVL tree":"plain BST")+". The tree was cleared.");}
+}
+
+document.querySelectorAll('input[name=mode]').forEach(function(r){r.onchange=function(){setMode(r.value,true);setStatus("");};});
+$("ins").onclick=function(){doOp("insert");};$("del").onclick=function(){doOp("delete");};$("srch").onclick=function(){doOp("search");};
+$("key").addEventListener("keydown",function(e){if(e.key==="Enter")doOp("insert");});
+document.querySelectorAll("[data-t]").forEach(function(b){b.onclick=function(){setStatus("");begin(traverse(st.committed,b.dataset.t),true);st.lastOp=b.dataset.t+" traversal";};});
+$("ex-asc").onclick=function(){setStatus("");loadTree(buildTree([10,20,30,40,50,60,70],avl()),avl()?"Inserted 10, 20, 30, 40, 50, 60, 70 in order. The AVL tree rotated to stay balanced.":"Inserted 10, 20, 30, 40, 50, 60, 70 in order. A plain BST becomes a chain of height 7.");};
+$("ex-rand").onclick=function(){setStatus("");var ks=sample(8,1,99);loadTree(buildTree(ks,avl()),"Inserted "+ks.join(", ")+" in this order.");};
+$("ex-clear").onclick=function(){setStatus("");loadTree(null,"Tree cleared.");};
+$("first").onclick=function(){pause();show(0);};
+$("prev").onclick=function(){pause();if(st.idx>0)show(st.idx-1);};
+$("next").onclick=function(){pause();if(st.idx<st.steps.length-1)show(st.idx+1);};
+$("play").onclick=function(){if(st.playing){pause();show(st.idx);}else play();};
+$("showbf").onchange=function(){show(st.idx);};
+$("aiprompt").onclick=function(){
+  var s=st.steps[st.idx],t="I am a B.Tech student learning "+(avl()?"AVL trees":"binary search trees")+". "+
+   "I just ran: "+(st.lastOp||"an example")+". My tree in preorder notation, where each node is (key left right) and - means empty, is: "+sexp(s.root)+". "+
+   "The simulator showed this step: \""+s.msg+"\" "+
+   "Please explain in simple words why this happens, without writing code. Do not just give me the final answer to anything I should work out myself. Then ask me one question to check my understanding.";
+  var e=$("aicopied");
+  if(navigator.clipboard)navigator.clipboard.writeText(t).then(function(){e.textContent="Prompt copied. Paste it into your AI assistant, then verify its answer against the steps list.";},function(){e.textContent=t;});else e.textContent=t;
+};
+
+/* ---------- tabs ---------- */
+var tabs=["sim","chal","guide"];
+function tab(name){
+  tabs.forEach(function(t){$("p-"+t).hidden=(t!==name);$("t-"+t).setAttribute("aria-selected",t===name?"true":"false");});
+  if(name!=="sim")pause();
+}
+tabs.forEach(function(t){$("t-"+t).onclick=function(){tab(t);};});
+
+/* ---------- challenges ---------- */
+var ch={type:null,tree:null,key:null,expect:null,answered:false,ok:0,all:0,st:0,hintUsed:false,trav:null};
+var TN={pre:"preorder",in:"inorder",post:"postorder",level:"level-order"};
+var CASES=[["None","No rotation needed"],["LL","LL: one right rotation"],["RR","RR: one left rotation"],["LR","LR: left, then right rotation"],["RL","RL: right, then left rotation"]];
+function score(){$("c-ok").textContent=ch.ok;$("c-all").textContent=ch.all;$("c-st").textContent=ch.st;}
+function resetUI(){$("c-fb").hidden=true;$("c-ans").hidden=false;$("c-hint").hidden=true;$("c-show").hidden=true;ch.answered=false;ch.hintUsed=false;}
+function feedback(ok,text){
+  ch.answered=true;ch.all++;if(ok){ch.ok++;ch.st++;}else ch.st=0;score();
+  var f=$("c-fb");f.hidden=false;f.className="fb "+(ok?"ok":"no");f.innerHTML="<strong></strong><br><span></span>";
+  f.firstChild.textContent=ok?"Correct.":"Not quite.";f.lastChild.textContent=text;
+  $("c-show").hidden=false;$("c-hint").hidden=true;
+}
+function newTrav(){
+  resetUI();ch.type="trav";
+  var keys=sample(7,1,99);ch.tree=buildTree(keys,false);
+  var types=["pre","in","post","level"];ch.trav=types[Math.floor(Math.random()*4)];
+  ch.expect={pre:preorder,in:inorder,post:postorder,level:levelorder}[ch.trav](ch.tree);
+  cv2.set(ch.tree,H(),false);
+  $("c-q").textContent="Write the "+TN[ch.trav]+" traversal of this tree.";
+  $("c-sub").textContent="Type the keys separated by spaces, then press Check.";
+  var a=$("c-ans");a.innerHTML='<div class="row"><label for="c-in" style="position:absolute;left:-999px">Your answer</label><input type="text" id="c-in" style="flex:1" placeholder="e.g. 40 20 60" autocomplete="off"><button id="c-chk">Check</button></div>';
+  $("c-hint").hidden=false;
+  $("c-chk").onclick=checkTrav;$("c-in").onkeydown=function(e){if(e.key==="Enter")checkTrav();};
+  $("c-in").focus();
+}
+function checkTrav(){
+  if(ch.answered)return;
+  var parts=$("c-in").value.split(/[\s,]+/).filter(Boolean).map(Number);
+  if(!parts.length){return;}
+  var ok=parts.length===ch.expect.length&&parts.every(function(v,i){return v===ch.expect[i];});
+  var rule={pre:"node, left, right",in:"left, node, right",post:"left, right, node",level:"row by row, left to right"}[ch.trav];
+  feedback(ok,(ok?"":"The correct order is "+ch.expect.join(" ")+". ")+"The rule for "+TN[ch.trav]+" is "+rule+". Use the button below to watch it run.");
+}
+function newRot(){
+  resetUI();ch.type="rot";
+  var target=CASES[Math.floor(Math.random()*5)][0],tree=null,key=null,res=null,tries=0;
+  while(tries++<500){
+    var ks=sample(4+Math.floor(Math.random()*4),1,99);tree=buildTree(ks,true);
+    key=Math.floor(Math.random()*99)+1;if(findKey(tree,key))continue;
+    res=run(tree,"insert",key,true);
+    if((res.meta.cases[0]||"None")===target)break;
+  }
+  ch.tree=tree;ch.key=key;ch.expect=res.meta.cases[0]||"None";ch.res=res;
+  cv2.set(tree,H(),true);
+  $("c-q").textContent="Insert "+key+" into this AVL tree. What happens?";
+  $("c-sub").textContent="Check the balance factors on the way back up from the new node, then choose the case.";
+  var a=$("c-ans");a.innerHTML='<div class="opts"></div>';
+  CASES.forEach(function(c){
+    var b=document.createElement("button");b.type="button";b.textContent=c[1];b.dataset.c=c[0];
+    b.onclick=function(){
+      if(ch.answered)return;
+      var ok=c[0]===ch.expect;
+      a.querySelectorAll("button").forEach(function(x){x.disabled=true;if(x.dataset.c===ch.expect)x.classList.add("right");else if(x===b)x.classList.add("wrong");});
+      var why=ch.expect==="None"?"After inserting "+key+" every balance factor stays between -1 and 1, so no rotation is needed.":
+        "Inserting "+key+" makes a node out of balance with the "+CASENAME[ch.expect]+" shape, which needs the "+(ch.expect==="LL"?"single right rotation":ch.expect==="RR"?"single left rotation":ch.expect==="LR"?"left-then-right double rotation":"right-then-left double rotation")+".";
+      feedback(ok,(ok?"":"The answer is "+(ch.expect==="None"?"no rotation":ch.expect)+". ")+why);
+    };
+    a.firstChild.appendChild(b);
+  });
+  $("c-hint").hidden=false;
+}
+$("c-trav").onclick=newTrav;$("c-rot").onclick=newRot;
+$("c-hint").onclick=function(){
+  if(ch.answered||ch.hintUsed)return;ch.hintUsed=true;
+  var f=$("c-fb");f.hidden=false;f.className="fb";
+  var t=ch.type==="trav"?"The first key in the answer is "+ch.expect[0]+".":"Insert "+ch.key+" by hand, then calculate balance factors starting from its parent and moving up. Look for a value of 2 or -2.";
+  f.textContent="Hint: "+t;
+};
+$("c-show").onclick=function(){
+  if(ch.type==="trav"){setMode("bst",false);st.committed=ch.tree;tab("sim");setStatus("");st.lastOp=TN[ch.trav]+" traversal";begin(traverse(ch.tree,ch.trav),true);}
+  else{setMode("avl",false);st.committed=ch.tree;tab("sim");setStatus("");st.lastOp="insert "+ch.key;begin(run(ch.tree,"insert",ch.key,true),true);}
+};
+
+/* test hooks (used for verification only) */
+window.TreeLab={run:run,traverse:traverse,buildTree:buildTree,allBalanced:allBalanced,inorder:inorder,preorder:preorder,postorder:postorder,levelorder:levelorder,ht:ht,count:count,bf:bf};
+
+show(0);buildLog();score();
+})();
+</script>
+</body>
+</html>
